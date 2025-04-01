@@ -11,8 +11,8 @@ import PostList from "./component/PostList/PostList";
 import EventList from "./component/EventList/EventList";
 import { useNavigation } from "@react-navigation/native";
 import { NAMES } from "@/navigation/name";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
 import FastImage from "react-native-fast-image";
 
 export enum EProfileTab {
@@ -49,6 +49,45 @@ const Profile = () => {
     { emoji: "📚", text: "Reading Books" },
     { emoji: "🎮", text: "Gaming" },
   ];
+
+  const dispatch = useDispatch<AppDispatch>();
+  const { userToken } = useSelector((state: RootState) => state.auth);
+
+  // This is the function for update-securities-verifyPhone API
+  // const onEditProfilePress = () => {
+  //   dispatch(
+  //     securityVerifyPhoneRequest({
+  //       url: "/update-securities/update-securities-verifyPhone",
+  //       userToken,
+  //       data: {  
+  //         phoneNumber: "+19786159222", 
+  //         otp: "50449" 
+  //       },
+  //     })
+  //   );
+  // }
+
+  // This is the function for update-securities-setting API
+  // const onEditProfilePress = () => {
+  //   dispatch(
+  //     updateSecuritySettingsRequest({
+  //       url: "/update-securities/update-securities-setting",
+  //       userToken,
+  //       data: {
+  //         isEmergencyAllowed: true, 
+  //         isLocationSharingAllowed: false,
+  //         isCheckInPointAllowed: true,
+  //         safeWord:[
+  //          {
+  //             qus: "what is ai",
+  //             aus: "hiii"
+  //         }
+  //         ], // send array to qus,aus
+  //         receiveCheckInReminders: "Everyhour" // "Everyhour", "Every15Minutes", "Every30Minutes", "Every45Minutes"
+  //     },
+  //     })
+  //   );
+  // }
 
   const PassionTag = ({ emoji, text }: { emoji: string; text: string }) => (
     <View style={style.passionTag}>

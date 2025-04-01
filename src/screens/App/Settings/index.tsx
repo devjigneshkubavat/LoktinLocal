@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTheme } from '@/hooks/useTheme'
 import styles from './styles'
 import { ICONS } from '@/constants'
@@ -25,10 +25,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import BoxComponent from '@/hoc/OuterView'
 import Icon from '@/components/Icon'
 import Button from '@/components/Button';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
 import { signOut } from '@/redux/services/authServices';
 import { PRIVACY_URL, TOS_URL } from '@/utils/Constants'
+import { sendReportRequest } from '@/redux/slices/postSlice'
+import { addPhoneNumberRequest } from '@/redux/slices/updateSecuritiesSlice'
 
 const Settings = () => {
     const insets = useSafeAreaInsets()
@@ -38,6 +40,23 @@ const Settings = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalStep, setModalStep] = useState<number>(1)
     const dispatch = useDispatch<AppDispatch>();
+
+    const { userToken } = useSelector((state: RootState) => state.auth);
+
+    // update-securities
+    // useEffect(() => {
+    //    const data =  {
+    //         "phoneNumber": "+19786159222"
+    //     }
+    //     console.log("data",data)
+    //     dispatch(
+    //         addPhoneNumberRequest({
+    //             url: "/update-securities/update-securities-addPhone",
+    //             userToken,
+    //             data
+    //           })
+    //         );
+    //   }, []);
 
     const handleClose = () => {
         setModalVisible(false)

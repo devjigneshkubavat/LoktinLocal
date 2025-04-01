@@ -276,6 +276,7 @@ export interface ImagesSrcProps {
 }
 
 export interface ChatListItem {
+  path: string | undefined;
   user: {
     id: number;
     username: string;

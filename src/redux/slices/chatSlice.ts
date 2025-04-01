@@ -44,6 +44,9 @@ export const chatSlice = createSlice({
     setMessageList: (state, action) => {
       state.chatMessages = action.payload;
     },
+    sendMessageRequest: (state, action) => {
+      //   state.chatsList = action.payload;
+    },
   },
 });
 export const {
@@ -51,5 +54,6 @@ export const {
   setChatList,
   getMessageListRequest,
   setMessageList,
+  sendMessageRequest
 } = chatSlice.actions;
 export default chatSlice.reducer;

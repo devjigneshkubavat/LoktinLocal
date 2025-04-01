@@ -3,6 +3,7 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import {
   getChatsListRequest,
   getMessageListRequest,
+  sendMessageRequest,
   setChatList,
   setMessageList,
 } from "../slices/chatSlice";
@@ -44,7 +45,27 @@ function* getMessageList(action: any) {
   }
 }
 
+function* sendMessage(action: any) {
+  const { payload } = action;
+  try {
+    const response: ApiResponse = yield call(
+      baseApi.post,
+      payload.url,
+      payload.data,
+      {
+        headers: {
+          Authorization: `Bearer ${payload.userToken}`,
+        },
+      }
+    );
+    console.log("response of sendMessage ::: ", response);
+  } catch (error) {
+    console.error("Error adding sendMessage:", error);
+  }
+}
+
 export default function* chat() {
   yield takeLatest(getChatsListRequest.type, getChatsList);
   yield takeLatest(getMessageListRequest.type, getMessageList);
+  yield takeLatest(sendMessageRequest.type, sendMessage);
 }

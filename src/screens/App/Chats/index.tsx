@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -18,7 +18,7 @@ import Icon from "@/components/Icon";
 import Header from "./Header";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { getMessageListRequest } from "@/redux/slices/chatSlice";
+import { getMessageListRequest, sendMessageRequest } from "@/redux/slices/chatSlice";
 import { MessageItem } from "@/constants/types";
 import moment from "moment";
 import { formatTimestamp } from "@/utils/helper";
@@ -26,6 +26,8 @@ import { formatTimestamp } from "@/utils/helper";
 const Chats = ({ route }: any) => {
   const { theme } = useTheme();
   const style = useMemo(() => styles(theme), [theme]);
+
+  const [messageText, setMessageText] = useState('');
 
   const { recieverData } = route.params ?? null;
 
@@ -43,7 +45,7 @@ const Chats = ({ route }: any) => {
           senderId: userInfo.userId,
           receiverId: recieverData?.id,
           page: 1,
-          pageSize: 5,
+          pageSize: 20,
           sortOrder: "DESC",
         },
       })
@@ -60,72 +62,72 @@ const Chats = ({ route }: any) => {
     date: string;
   };
 
-  const messages: Message[] = [
-    {
-      id: "1",
-      sender: "other",
-      type: "text",
-      text: "Hi, How’s going on?",
-      timestamp: "12:30 AM",
-      date: "Yesterday",
-    },
-    {
-      id: "2",
-      sender: "me",
-      type: "text",
-      text: "Well it’s good but you know about that 😎",
-      timestamp: "12:33 AM",
-      date: "Yesterday",
-    },
-    {
-      id: "2",
-      sender: "me",
-      type: "text",
-      text: "Well it’s good but you know about that 😎",
-      timestamp: "12:33 AM",
-      date: "Yesterday",
-    },
-    {
-      id: "2",
-      sender: "me",
-      type: "text",
-      text: "Well it’s good but you know about that 😎",
-      timestamp: "12:33 AM",
-      date: "Yesterday",
-    },
-    {
-      id: "3",
-      sender: "other",
-      type: "text",
-      text: "Do you want Starbucks? 😆",
-      timestamp: "12:38 AM",
-      date: "Yesterday",
-    },
-    {
-      id: "4",
-      sender: "me",
-      type: "text",
-      text: "That would be awesome!",
-      timestamp: "1:40 AM",
-      date: "Today",
-    },
-    {
-      id: "4",
-      sender: "me",
-      type: "text",
-      text: "That would be awesome!",
-      timestamp: "1:40 AM",
-      date: "Today",
-    },
-    {
-      id: "4",
-      sender: "me",
-      type: "text",
-      text: "That would be awesome!",
-      timestamp: "1:40 AM",
-      date: "Today",
-    },
-  ];
+  // const messages: Message[] = [
+  //   {
+  //     id: "1",
+  //     sender: "other",
+  //     type: "text",
+  //     text: "Hi, How’s going on?",
+  //     timestamp: "12:30 AM",
+  //     date: "Yesterday",
+  //   },
+  //   {
+  //     id: "2",
+  //     sender: "me",
+  //     type: "text",
+  //     text: "Well it’s good but you know about that 😎",
+  //     timestamp: "12:33 AM",
+  //     date: "Yesterday",
+  //   },
+  //   {
+  //     id: "2",
+  //     sender: "me",
+  //     type: "text",
+  //     text: "Well it’s good but you know about that 😎",
+  //     timestamp: "12:33 AM",
+  //     date: "Yesterday",
+  //   },
+  //   {
+  //     id: "2",
+  //     sender: "me",
+  //     type: "text",
+  //     text: "Well it’s good but you know about that 😎",
+  //     timestamp: "12:33 AM",
+  //     date: "Yesterday",
+  //   },
+  //   {
+  //     id: "3",
+  //     sender: "other",
+  //     type: "text",
+  //     text: "Do you want Starbucks? 😆",
+  //     timestamp: "12:38 AM",
+  //     date: "Yesterday",
+  //   },
+  //   {
+  //     id: "4",
+  //     sender: "me",
+  //     type: "text",
+  //     text: "That would be awesome!",
+  //     timestamp: "1:40 AM",
+  //     date: "Today",
+  //   },
+  //   {
+  //     id: "4",
+  //     sender: "me",
+  //     type: "text",
+  //     text: "That would be awesome!",
+  //     timestamp: "1:40 AM",
+  //     date: "Today",
+  //   },
+  //   {
+  //     id: "4",
+  //     sender: "me",
+  //     type: "text",
+  //     text: "That would be awesome!",
+  //     timestamp: "1:40 AM",
+  //     date: "Today",
+  //   },
+  // ];
 
   const renderMessage = ({ item }: { item: MessageItem }) => {
     const isSentByMe = item.senderId === userInfo.userId;
@@ -186,10 +188,25 @@ const Chats = ({ route }: any) => {
       }
       grouped[messageDate].push(msg);
     });
+    // return Object.values(grouped).flat(); // Reverse for inverted FlatList
     return Object.values(grouped).flat().reverse(); // Reverse for inverted FlatList
   };
 
   const chatData = groupedMessages();
+
+  const onSendPress = () => {
+    dispatch(
+      sendMessageRequest({
+        url: "messages/send",
+        userToken,
+        data: {
+          senderId: userInfo.userId,
+          receiverId: recieverData?.id,
+          content: messageText
+        },
+      })
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -225,11 +242,13 @@ const Chats = ({ route }: any) => {
             </TouchableOpacity>
             <TextInput
               style={style.input}
+              value={messageText}
+              onChangeText={setMessageText}
               placeholder="Type something..."
               placeholderTextColor={COLORS.lightFont}
             />
           </View>
-          <TouchableOpacity style={style.send}>
+          <TouchableOpacity style={style.send} onPress={onSendPress} > 
             <Icon icon={ICONS.send} iconStyle={style.iconSize} />
           </TouchableOpacity>
         </View>
