@@ -20,7 +20,7 @@ const sagaMiddleware = createSagaMiddleware();
 import cartReducer from "../redux/slices/cartSlice";
 import chatReducer from "../redux/slices/chatSlice";
 import postReducer from "../redux/slices/postSlice";
-import updateSecuritiesSlice from '../redux/slices/updateSecuritiesSlice'
+import updateSecuritiesSlice from "../redux/slices/updateSecuritiesSlice";
 
 const persistConfig = {
   key: "root",
@@ -35,7 +35,7 @@ const appReducer = combineReducers({
   plan: planReducer,
   chat: chatReducer,
   post: postReducer,
-  updateSecuritiesSaga: updateSecuritiesSlice
+  updateSecuritiesSaga: updateSecuritiesSlice,
 });
 const rootReducer = (state: any, action: any) => {
   if (action.type === "RESET_STATE") {

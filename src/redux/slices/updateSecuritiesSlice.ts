@@ -7,22 +7,26 @@ import {
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface UsersState {
-//   chatsList: ChatListItem[];
-//   chatMessages: {
-//     page: number;
-//     pageSize: number;
-//     totalMessages: number;
-//     messages: MessageItem[];
-//   };
+  isPhoneAddsuccess: boolean;
+  securitySettings: {
+    isEmergencyAllowed: boolean;
+    isLocationSharingAllowed: boolean;
+    isCheckInPointAllowed: boolean;
+    safeWord: { qus: string; aus: string }[];
+    receiveCheckInReminders: string;
+  };
+  dummy: string;
 }
 const usersInitialState: UsersState = {
-//   chatsList: [],
-//   chatMessages: {
-//     page: 1,
-//     pageSize: 5,
-//     totalMessages: 2,
-//     messages: [],
-//   },
+  isPhoneAddsuccess: false,
+  securitySettings: {
+    isEmergencyAllowed: true,
+    isLocationSharingAllowed: false,
+    isCheckInPointAllowed: true,
+    safeWord: [],
+    receiveCheckInReminders: "Everyhour",
+  },
+  dummy: "",
 };
 
 export const updateSecuritiesSlice = createSlice({
@@ -33,19 +37,26 @@ export const updateSecuritiesSlice = createSlice({
          and set the loader to true and reset error message.
       */
     addPhoneNumberRequest: (state, action) => {
-        //   state.chatsList = action.payload;
+      state.isPhoneAddsuccess = false;
+    },
+    addPhoneNumberSuccess: (state, action) => {
+      state.isPhoneAddsuccess = true;
     },
     securityVerifyPhoneRequest: (state, action) => {
-        //   state.chatsList = action.payload;
+      //   state.chatsList = action.payload;
     },
     updateSecuritySettingsRequest: (state, action) => {
-        //   state.chatsList = action.payload;
+      //   state.chatsList = action.payload;
+      console.log("action.action ::: ", action.payload);
+
+      state.dummy = action.payload + "dummy";
     },
   },
 });
 export const {
-    addPhoneNumberRequest,
-    securityVerifyPhoneRequest,
-    updateSecuritySettingsRequest
+  addPhoneNumberRequest,
+  securityVerifyPhoneRequest,
+  updateSecuritySettingsRequest,
+  addPhoneNumberSuccess,
 } = updateSecuritiesSlice.actions;
 export default updateSecuritiesSlice.reducer;

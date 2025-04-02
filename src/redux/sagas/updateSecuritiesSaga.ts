@@ -8,6 +8,7 @@ import {
 } from "../slices/chatSlice";
 import {
   addPhoneNumberRequest,
+  addPhoneNumberSuccess,
   securityVerifyPhoneRequest,
   updateSecuritySettingsRequest,
 } from "../slices/updateSecuritiesSlice";
@@ -31,9 +32,10 @@ function* addPhoneNumber(action: any) {
       }
     );
     console.log("response ::------->", response);
-    // yield put(setChatList(response.conversations));
+    yield put(addPhoneNumberSuccess(response));
   } catch (error) {
     console.error("Error adding comment:", error);
+    showToast(error);
   }
 }
 
@@ -58,21 +60,23 @@ function* securityVerifyPhone(action: any) {
 
 function* updateSecuritySettings(action: any) {
   const { payload } = action;
-  try {
-      const response: ApiResponse = yield call(
-          baseApi.put,
-          payload.url,
-          payload.data,
-          {
-              headers: {
-                  Authorization: `Bearer ${payload.userToken}`,
-                },
-            }
-        );
-    showToast(response);
-  } catch (error) {
-    showToast(error);
-  }
+  console.log("payload at saga ::: ", payload);
+
+  // try {
+  //   const response: ApiResponse = yield call(
+  //     baseApi.put,
+  //     payload.url,
+  //     payload.data,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${payload.userToken}`,
+  //       },
+  //     }
+  //   );
+  //   showToast(response);
+  // } catch (error) {
+  //   showToast(error);
+  // }
 }
 
 export default function* updateSecuritiesSaga() {

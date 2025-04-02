@@ -20,7 +20,6 @@ function* getPostsList(action: any) {
         Authorization: `Bearer ${payload.userToken}`,
       },
     });
-    console.log("getPostsList ::--->", response);
     yield put(setPostList(response.data));
   } catch (error) {
     console.error("getPostsList ERROR:", error);
