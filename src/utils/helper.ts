@@ -27,7 +27,7 @@ export const addPrefixToPhone = (
   return userData; // Return as is if no phone field
 };
 
-export const showToast = (response: any) => {
+export const showToast = (response: any, props: { position: any; icon: any; } | undefined) => {
   if (response?.status === 200) {
     Toast.show({
       type: "customToast",
@@ -41,10 +41,10 @@ export const showToast = (response: any) => {
     Toast.show({
       type: "customToast",
       text1: response.message ?? response.toString(),
-      position: "bottom",
+      position: props?.position || "bottom",
       visibilityTime: 2000,
       swipeable: false,
-      props: { icon: ICONS.errorIcon },
+      props: { icon: props?.icon || ICONS.errorIcon },
     });
   }
 };

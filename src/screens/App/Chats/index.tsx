@@ -1,6 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Alert,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -18,17 +20,23 @@ import Icon from "@/components/Icon";
 import Header from "./Header";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { getMessageListRequest, sendMessageRequest } from "@/redux/slices/chatSlice";
+import { clearChatRequest, deleteMessageRequest, getMessageListRequest, sendMessageRequest, updateMessageRequest } from "@/redux/slices/chatSlice";
 import { MessageItem } from "@/constants/types";
 import moment from "moment";
 import { formatTimestamp } from "@/utils/helper";
+import Modal from "react-native-modal";
+
 
 const Chats = ({ route }: any) => {
   const { theme } = useTheme();
   const style = useMemo(() => styles(theme), [theme]);
+  const inputRef: MutableRefObject<TextInput | null> = useRef(null);
 
   const [messageText, setMessageText] = useState('');
-
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const [isEditMessage, setIsEditMessage] = useState<boolean>(false);
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  
   const { recieverData } = route.params ?? null;
 
   const dispatch = useDispatch<AppDispatch>();
@@ -36,7 +44,10 @@ const Chats = ({ route }: any) => {
   const { chatMessages } = useSelector((state: RootState) => state.chat);
   const { userInfo } = useSelector((state: RootState) => state.user);
 
-  useEffect(() => {
+  console.log("chatMessages",chatMessages);
+  
+
+  const apiCallForGetChat = () => {
     dispatch(
       getMessageListRequest({
         url: "messages/get-message",
@@ -50,6 +61,10 @@ const Chats = ({ route }: any) => {
         },
       })
     );
+  }
+
+  useEffect(() => {
+    apiCallForGetChat();
   }, []);
 
   type Message = {
@@ -132,7 +147,10 @@ const Chats = ({ route }: any) => {
   const renderMessage = ({ item }: { item: MessageItem }) => {
     const isSentByMe = item.senderId === userInfo.userId;
     return (
-      <View style={isSentByMe ? style.myMessage : style.otherMessage}>
+      <TouchableOpacity style={isSentByMe ? style.myMessage : style.otherMessage} onPress={() => {
+        setModalVisible(true);
+        setSelectedMessage(item);
+        }}>
         <View
           style={[
             style.messageContainer,
@@ -173,7 +191,7 @@ const Chats = ({ route }: any) => {
         >
           {moment(item.createdAt).format("hh:mm A")}
         </Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -206,7 +224,72 @@ const Chats = ({ route }: any) => {
         },
       })
     );
+    setTimeout(() => {
+      setMessageText("");
+      apiCallForGetChat();
+      Keyboard.dismiss();
+    }, 2000)
   }
+
+  const handleEditPress = () => {
+    if(selectedMessage?.id){
+      dispatch(
+        updateMessageRequest({
+          url: `messages/update-message/${selectedMessage?.id}`,
+          userToken,
+          data : {
+            content: messageText
+          }
+        })
+      )
+      setTimeout(() => {
+        apiCallForGetChat();
+        setModalVisible(false);
+        setIsEditMessage(false);
+        setMessageText("");
+        Keyboard.dismiss();
+      },2000)
+    }
+  }
+
+  const apiCallForDeleteMessage = () => {
+    if(selectedMessage?.id){
+      dispatch(
+        deleteMessageRequest({
+          url: `/messages/delete-message/${selectedMessage?.id}`,
+          userToken,
+        })
+      );
+      setTimeout(() => {
+        apiCallForGetChat();
+        setModalVisible(false);
+      },2000)
+   
+    }
+
+       // dispatch(
+    //   clearChatRequest({
+    //     url: `messages/chat-All-Clear/${userInfo.userId}`,
+    //     userToken,
+    //   })
+    // );
+  };
+
+  const apiCallForClearChat = () => {
+    dispatch(
+      clearChatRequest({
+        url: `messages/chat-All-Clear/${userInfo.userId}`,
+        userToken,
+      })
+    );
+  };
+
+  const handleEdit = () => {
+    inputRef.current.focus();
+    setIsEditMessage(true);
+    setMessageText(selectedMessage?.content);
+    setModalVisible(false);
+  };
 
   return (
     <KeyboardAvoidingView
@@ -215,6 +298,29 @@ const Chats = ({ route }: any) => {
       style={style.container}
     >
       <Header />
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        style={{ justifyContent: "center", alignItems: "center" }}
+      >
+        <View
+          style={{
+            width: 200,
+            backgroundColor: "white",
+            padding: 15,
+            borderRadius: 10,
+            alignItems: "center"
+          }}
+        >
+          <TouchableOpacity onPress={handleEdit} style={{ padding: 10 }}>
+            <Text style={{ fontSize: 16 }}>Edit Message</Text>
+          </TouchableOpacity>
+          <View style={{ height: 1, width: "100%", backgroundColor: "#ccc" }} />
+          <TouchableOpacity onPress={apiCallForDeleteMessage} style={{ padding: 10 }}>
+            <Text style={{ fontSize: 16, color: "red" }}>Delete Message</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
       <View style={style.chatContainer}>
         <FlatList
           data={chatData}
@@ -241,14 +347,18 @@ const Chats = ({ route }: any) => {
               />
             </TouchableOpacity>
             <TextInput
+              ref={inputRef}
               style={style.input}
               value={messageText}
               onChangeText={setMessageText}
               placeholder="Type something..."
               placeholderTextColor={COLORS.lightFont}
+              onSubmitEditing={() => handleEditPress()}
             />
           </View>
-          <TouchableOpacity style={style.send} onPress={onSendPress} > 
+          <TouchableOpacity style={style.send} onPress={() => {
+           isEditMessage ? handleEditPress() :  onSendPress();
+          }} > 
             <Icon icon={ICONS.send} iconStyle={style.iconSize} />
           </TouchableOpacity>
         </View>

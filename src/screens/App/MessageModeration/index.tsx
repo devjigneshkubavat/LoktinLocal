@@ -34,6 +34,7 @@ const MessageModeration = () => {
   const handleSubmit = () => {
     const message = {
       reportMassge: " hello",
+      IsbugReport: true
     };
     dispatch(
       sendReportRequest({

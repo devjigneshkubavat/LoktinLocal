@@ -13,6 +13,8 @@ import {
   updateSecuritySettingsRequest,
 } from "../slices/updateSecuritiesSlice";
 import { showToast } from "@/utils/helper";
+import { ICONS } from "@/constants";
+import Toast from "react-native-toast-message";
 
 interface ApiResponse {
   [key: string]: any;
@@ -60,23 +62,30 @@ function* securityVerifyPhone(action: any) {
 
 function* updateSecuritySettings(action: any) {
   const { payload } = action;
-  console.log("payload at saga ::: ", payload);
 
-  // try {
-  //   const response: ApiResponse = yield call(
-  //     baseApi.put,
-  //     payload.url,
-  //     payload.data,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${payload.userToken}`,
-  //       },
-  //     }
-  //   );
-  //   showToast(response);
-  // } catch (error) {
-  //   showToast(error);
-  // }
+  try {
+    const response: ApiResponse = yield call(
+      baseApi.put,
+      payload.url,
+      payload.data,
+      {
+        headers: {
+          Authorization: `Bearer ${payload.userToken}`,
+        },
+      }
+    );
+    
+    Toast.show({
+          type: "success",
+          text1: response.message ?? response.toString(),
+          position: "top",
+          visibilityTime: 2000,
+          swipeable: false,
+          props: { icon: ICONS.successIcon },
+        });
+  } catch (error) {
+    showToast(error);
+  }
 }
 
 export default function* updateSecuritiesSaga() {

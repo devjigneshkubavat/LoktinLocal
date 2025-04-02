@@ -46,10 +46,10 @@ export const updateSecuritiesSlice = createSlice({
       //   state.chatsList = action.payload;
     },
     updateSecuritySettingsRequest: (state, action) => {
-      //   state.chatsList = action.payload;
-      console.log("action.action ::: ", action.payload);
-
-      state.dummy = action.payload + "dummy";
+        // state.securitySettings = action.payload;
+    },
+    updateSecuritySettings: (state, action) => {
+        state.securitySettings = action.payload;
     },
   },
 });
@@ -58,5 +58,6 @@ export const {
   securityVerifyPhoneRequest,
   updateSecuritySettingsRequest,
   addPhoneNumberSuccess,
+  updateSecuritySettings
 } = updateSecuritiesSlice.actions;
 export default updateSecuritiesSlice.reducer;

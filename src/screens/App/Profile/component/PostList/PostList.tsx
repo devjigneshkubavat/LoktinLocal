@@ -22,7 +22,7 @@ const PostList = () => {
   const { userToken } = useSelector((state: RootState) => state.auth);
   const { postsList } = useSelector((state: RootState) => state.post);
 
-  // console.log("planImagesList", planImagesList);
+  console.log("postsList", postsList);
 
   useEffect(() => {
     dispatch(
@@ -36,7 +36,7 @@ const PostList = () => {
   return (
     <View style={style.boxContainer}>
       {postsList?.map((item) => (
-        <FastImage source={{ uri: item?.path }} style={style.boxImage} />
+        <FastImage source={{ uri: `https://api.loktin.app/${item?.path}` }} style={style.boxImage} />
       ))}
       {/* {userInfo.profilePhotoUrls?.map((item) => (
         <FastImage source={{ uri: item }} style={style.boxImage} />

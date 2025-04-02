@@ -10,7 +10,7 @@ import { NAMES } from "@/navigation/name";
 import BoxComponent from "@/hoc/OuterView";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { updateSecuritySettingsRequest } from "@/redux/slices/updateSecuritiesSlice";
+import { updateSecuritySettings, updateSecuritySettingsRequest } from "@/redux/slices/updateSecuritiesSlice";
 
 const EmeregencyFeatures = () => {
   const { theme } = useTheme();
@@ -19,6 +19,9 @@ const EmeregencyFeatures = () => {
   const { securitySettings, isPhoneAddsuccess } = useSelector(
     (state: RootState) => state.updateSecuritiesSaga
   );
+  const { userToken } = useSelector((state: RootState) => state.auth);
+
+  console.log("securitySettings at screen ::: ", securitySettings);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -44,25 +47,25 @@ const EmeregencyFeatures = () => {
       onPress: () => navigation.navigate(NAMES.trustcontact),
     },
     {
-      key: "emergencybutton",
+      key: "isEmergencyAllowed",
       title: "EmergencyButton",
-      value: securitySettings.isEmergencyAllowed,
+      value: securitySettings?.isEmergencyAllowed,
       type: "switch",
       description:
         "Loktin prioritizes your safety. By activating this slider, you’ll instantly access the Emergency Button, allowing you to quickly alert a trusted  contact in an emergency. It’s discreet, fast, and designed to give you peace of mind, always. ",
     },
     {
-      key: "shareyourlocation",
+      key: "isLocationSharingAllowed",
       title: "Share Your Location",
-      value: securitySettings.isLocationSharingAllowed,
+      value: securitySettings?.isLocationSharingAllowed,
       type: "switch",
       description:
         "This feature lets you securely share your location with a trusted friend, giving them peace of mind and keeping you connected.",
     },
     {
-      key: "safetycheckpoints",
+      key: "isCheckInPointAllowed",
       title: "Safety Checkpoints",
-      value: securitySettings.isCheckInPointAllowed,
+      value: securitySettings?.isCheckInPointAllowed,
       type: "switch",
       description:
         "Safety Checkpoints help keep you secure during meetups. Choose a question and set your answer, then decide how often to check in. If you don’t respond correctly or within an hour, your emergency contact will be notified with your last location. Stay safe and in control.",
@@ -87,7 +90,22 @@ const EmeregencyFeatures = () => {
   ];
 
   const onSwitchValueChange = (item, val) => {
-    // dispatch(updateSecuritySettingsRequest("Hi"));
+    const updateSettingConfig = {
+      ...securitySettings,
+      ...{ [item.key]: val },
+    };
+
+    dispatch(
+      updateSecuritySettings(updateSettingConfig)
+    );
+    dispatch(
+      updateSecuritySettingsRequest({
+        url: "update-securities/update-securities-setting",
+        userToken,
+
+        data: updateSettingConfig,
+      })
+    );
   };
 
   return (

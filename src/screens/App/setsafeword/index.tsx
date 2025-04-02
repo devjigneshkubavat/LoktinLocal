@@ -1,5 +1,5 @@
 import { useTheme } from '@/hooks/useTheme'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Text, TextInput, View } from 'react-native'
 import style from './style'
 import BoxComponent from '@/hoc/OuterView'
@@ -8,12 +8,49 @@ import Header from '@/components/Header'
 import { goBack } from '@/navigation/rootNavigation'
 import { ICONS } from '@/constants'
 import Button from '@/components/Button'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '@/store/store'
+import { updateSecuritySettings, updateSecuritySettingsRequest } from '@/redux/slices/updateSecuritiesSlice'
 
 const SetSafeword = () => {
-    const route = useRoute()
+    const route = useRoute();
+
+    const [safeWordAnswer, setSafeWordAnswer] = useState("");
+    const { userToken } = useSelector((state: RootState) => state.auth);
+    const { securitySettings } = useSelector(
+       (state: RootState) => state.updateSecuritiesSaga
+     );
+
 
     const { theme } = useTheme()
     const styless = useMemo(() => style(theme), [theme])
+
+    const dispatch = useDispatch<AppDispatch>();
+
+
+    const onPressSetSafeWord = () => {
+
+      const updateSettingConfig = {
+        ...securitySettings,
+        safeWord: [
+          {
+            qus: route?.params?.item,
+            aus: safeWordAnswer,
+          },
+        ],
+      };
+
+      dispatch(updateSecuritySettings(updateSettingConfig));
+      dispatch(
+        updateSecuritySettingsRequest({
+          url: "update-securities/update-securities-setting",
+          userToken,
+
+          data: updateSettingConfig,
+        })
+      );
+      goBack()
+    };
 
     return (
         <View style={styless.container}>
@@ -32,6 +69,8 @@ const SetSafeword = () => {
                     placeholder={'Enter your new safe word.'}
                     multiline={true}
                     style={styless.textinput}
+                    value={safeWordAnswer}
+                    onChangeText={setSafeWordAnswer}
                 />
             </View>
 
@@ -39,7 +78,7 @@ const SetSafeword = () => {
                 title='Set Safe Word'
                 viewstyle={styless.bottomView}
                 textStyle={styless.btnText}
-                onPress={goBack}
+                onPress={onPressSetSafeWord}
             />
             <Button
                 title='Edit Prompt'

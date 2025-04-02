@@ -47,6 +47,15 @@ export const chatSlice = createSlice({
     sendMessageRequest: (state, action) => {
       //   state.chatsList = action.payload;
     },
+    deleteMessageRequest: (state, action) => {
+      //   state.chatsList = action.payload;
+    },
+    updateMessageRequest: (state, action) => {
+      //   state.chatsList = action.payload;
+    },
+    clearChatRequest: (state, action) => {
+      //   state.chatsList = action.payload;
+    },
   },
 });
 export const {
@@ -54,6 +63,9 @@ export const {
   setChatList,
   getMessageListRequest,
   setMessageList,
-  sendMessageRequest
+  sendMessageRequest,
+  deleteMessageRequest,
+  updateMessageRequest,
+  clearChatRequest
 } = chatSlice.actions;
 export default chatSlice.reducer;
