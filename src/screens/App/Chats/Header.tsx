@@ -1,14 +1,20 @@
 import Icon from '@/components/Icon'
 import { ICONS } from '@/constants'
 import React from 'react'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { GestureResponderEvent, Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { FONTS } from '@/constants'
 import { COLORS } from '@/constants/colors'
 import { horizontalScale, moderateScale, verticalScale } from '@/utils/metrics'
 import { useTheme } from '@/hooks/useTheme'
 import { goBack } from '@/navigation/rootNavigation'
 
-const Header: React.FC = () => {
+interface HeaderInterface {
+    title: string;
+    source: ImageSourcePropType,
+    onPressDots: ((event: GestureResponderEvent) => void) | undefined;
+}
+
+const Header = ({title, source, onPressDots}: HeaderInterface) => {
     const { theme } = useTheme()
 
     return (
@@ -23,7 +29,7 @@ const Header: React.FC = () => {
             <View style={styles.centerView}>
                 <Image
                     style={styles.userImage}
-                    source={require('@/assets/image/demoPost.jpeg')}
+                    source={source}
                 />
                 <View>
                     <Text
@@ -32,7 +38,7 @@ const Header: React.FC = () => {
                             { color: theme.colors.black }
                         ]}
                     >
-                        {'Marvin McKinney'}
+                        {title}
                     </Text>
                     <Text
                         style={[
@@ -53,7 +59,7 @@ const Header: React.FC = () => {
                         <Image style={styles.icons} source={ICONS.phone} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={onPressDots}>
                         <Image style={styles.icons} source={ICONS.more} />
                     </TouchableOpacity>
                 </View>
@@ -111,6 +117,6 @@ const styles = StyleSheet.create({
         width: moderateScale(35),
         borderRadius: moderateScale(40),
         marginRight: horizontalScale(10),
-        backgroundColor: 'red'
+        borderWidth: 1 
     }
 })

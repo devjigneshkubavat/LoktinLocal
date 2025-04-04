@@ -48,6 +48,29 @@ export const showToast = (response: any, props: { position: any; icon: any; } | 
     });
   }
 };
+
+export const showToastMessage = (type: string, message: string) => {
+  if (type === "response") {
+    Toast.show({
+      type: "customToast",
+      text1: message,
+      position: "top",
+      visibilityTime: 2000,
+      swipeable: false,
+      props: { icon: ICONS.successIcon },
+    });
+  } else {
+    Toast.show({
+      type: "customToast",
+      text1: message,
+      position: "top",
+      visibilityTime: 2000,
+      swipeable: false,
+      props: { icon: ICONS.errorIcon },
+    });
+  }
+};
+
 export const normalizeUserDetails = (
   data: Record<string, any>
 ): Record<string, any> => {

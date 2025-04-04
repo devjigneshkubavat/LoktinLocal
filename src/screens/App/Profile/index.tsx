@@ -14,6 +14,8 @@ import { NAMES } from "@/navigation/name";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import FastImage from "react-native-fast-image";
+import Imagemodal from "../Create/component/Uploadimagemodal/imahemodal";
+import ImagePicker from 'react-native-image-crop-picker'
 
 export enum EProfileTab {
   Posts = "Posts",
@@ -34,8 +36,20 @@ const Profile = () => {
   const [selectedTab, setSelectedTab] = useState<EProfileTab>(
     EProfileTab.Posts
   );
+      const [Input, SetInput] = useState({
+          Username: '',
+          Name: '',
+          Bio: '',
+          SelectedImage: {
+              base64: '',
+              uri: '',
+              filename: ''
+          },
+          Imagemodal: false
+      })
   const { userInfo } = useSelector((state: RootState) => state.user);
 
+  
   const dummyImage = "https://randomuser.me/api/portraits/men/1.jpg";
 
   const passions = [
@@ -89,6 +103,45 @@ const Profile = () => {
   //   );
   // }
 
+  const opencamera = () => {
+    ImagePicker.openCamera({
+        width: 300,
+        height: 400,
+        cropping: true,
+        includeBase64: true
+    }).then(response => {
+        SetInput(pre => ({ ...pre, Imagemodal: false }))
+        SetInput(pre => ({
+            ...pre,
+            SelectedImage: {
+                base64: '',
+                uri: response.path,
+                filename: response.filename || ''
+            }
+        }))
+    })
+}
+
+const opengallery = () => {
+    ImagePicker.openPicker({
+        width: 300,
+        height: 400,
+        cropping: true
+    }).then(response => {
+        console.log(response.filename);
+
+        SetInput(pre => ({ ...pre, Imagemodal: false }))
+        SetInput(pre => ({
+            ...pre,
+            SelectedImage: {
+                base64: '',
+                uri: response.path,
+                filename: response.filename || ''
+            }
+        }))
+    })
+}
+
   const PassionTag = ({ emoji, text }: { emoji: string; text: string }) => (
     <View style={style.passionTag}>
       <Text style={style.passionEmoji}>{emoji}</Text>
@@ -117,7 +170,8 @@ const Profile = () => {
   const renderTabDetails = () => {
     switch (selectedTab) {
       case EProfileTab.Posts:
-        return <PostList />;
+        return <PostList onPressPlusIcon={() => navigation.navigate(NAMES.createPost)
+        }/>;
         break;
       case EProfileTab.Created:
         return <EventList />;
@@ -166,7 +220,7 @@ const Profile = () => {
             onPress={() => navigation.navigate(NAMES.chats)}
           /> */}
           <Button
-            title={'Edit profile'}
+            title={"Edit profile"}
             viewstyle={style.bottomView}
             textStyle={style.btnText}
             onPress={() => navigation.navigate(NAMES.editprofile)}
@@ -195,6 +249,16 @@ const Profile = () => {
         </View>
         {renderTabDetails()}
       </ScrollView>
+      <Imagemodal
+        visible={Input.Imagemodal}
+        onrequestClose={() =>
+          SetInput((pre) => ({ ...pre, Imagemodal: false }))
+        }
+        opencamera={opencamera}
+        opengallery={opengallery}
+        onclose={() => SetInput((pre) => ({ ...pre, Imagemodal: false }))}
+        ontouchable={() => SetInput((pre) => ({ ...pre, Imagemodal: false }))}
+      />
     </View>
   );
 };

@@ -1,7 +1,9 @@
 import React, { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -25,6 +27,7 @@ import { MessageItem } from "@/constants/types";
 import moment from "moment";
 import { formatTimestamp } from "@/utils/helper";
 import Modal from "react-native-modal";
+import { verticalScale } from "@/utils/metrics";
 
 
 const Chats = ({ route }: any) => {
@@ -35,9 +38,11 @@ const Chats = ({ route }: any) => {
   const [messageText, setMessageText] = useState('');
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [isEditMessage, setIsEditMessage] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [isVisibleClearAllModal, setIsVisibleClearAllModal] = useState<boolean>(false);
   
-  const { recieverData } = route.params ?? null;
+  const { recieverData } = route.params ?? null;  
 
   const dispatch = useDispatch<AppDispatch>();
   const { userToken } = useSelector((state: RootState) => state.auth);
@@ -45,7 +50,6 @@ const Chats = ({ route }: any) => {
   const { userInfo } = useSelector((state: RootState) => state.user);
 
   console.log("chatMessages",chatMessages);
-  
 
   const apiCallForGetChat = () => {
     dispatch(
@@ -161,7 +165,6 @@ const Chats = ({ route }: any) => {
             },
           ]}
         >
-          {/* {item.type === "text" ? ( */}
           <Text
             style={[
               style.messageText,
@@ -172,14 +175,6 @@ const Chats = ({ route }: any) => {
           >
             {item.content}
           </Text>
-          {/* ) : (
-          <View style={style.audioMessage}>
-            <View style={style.audioWave} />
-                        <Text style={style.audioDuration}>
-                            {item.audioDuration}
-                        </Text>
-          </View>
-        )} */}
         </View>
         <Text
           style={[
@@ -195,22 +190,42 @@ const Chats = ({ route }: any) => {
     );
   };
 
+  // const groupedMessages = () => {
+  //   const grouped: {
+  //     [key: string]: (MessageItem | { type: "header"; date: string })[];
+  //   } = {};
+  //   chatMessages?.messages?.forEach((msg) => {
+  //     const messageDate = moment(msg.createdAt).format("DD MMM YYYY");
+  //     if (!grouped[messageDate]) {
+  //       grouped[messageDate] = [{ type: "header", date: messageDate }];
+  //     }
+  //     grouped[messageDate].push(msg);
+  //   });
+  //   // return Object.values(grouped).flat(); // Reverse for inverted FlatList
+  //   return Object.values(grouped).flat().reverse(); // Reverse for inverted FlatList
+  // };
+
   const groupedMessages = () => {
-    const grouped: {
-      [key: string]: (MessageItem | { type: "header"; date: string })[];
-    } = {};
+    const grouped: { [key: string]: MessageItem[] } = {};
+  
     chatMessages?.messages?.forEach((msg) => {
       const messageDate = moment(msg.createdAt).format("DD MMM YYYY");
       if (!grouped[messageDate]) {
-        grouped[messageDate] = [{ type: "header", date: messageDate }];
+        grouped[messageDate] = [];
       }
       grouped[messageDate].push(msg);
     });
-    // return Object.values(grouped).flat(); // Reverse for inverted FlatList
-    return Object.values(grouped).flat().reverse(); // Reverse for inverted FlatList
+  
+    const sortedMessages = Object.entries(grouped).map(([date, messages]) => {
+      messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      return [{ type: "header", date }, ...messages];
+    });
+  
+    return sortedMessages.flat()
   };
-
+  
   const chatData = groupedMessages();
+
 
   const onSendPress = () => {
     dispatch(
@@ -254,6 +269,7 @@ const Chats = ({ route }: any) => {
 
   const apiCallForDeleteMessage = () => {
     if(selectedMessage?.id){
+      setIsLoading(true);
       dispatch(
         deleteMessageRequest({
           url: `/messages/delete-message/${selectedMessage?.id}`,
@@ -261,6 +277,7 @@ const Chats = ({ route }: any) => {
         })
       );
       setTimeout(() => {
+        setIsLoading(false);
         apiCallForGetChat();
         setModalVisible(false);
       },2000)
@@ -275,13 +292,20 @@ const Chats = ({ route }: any) => {
     // );
   };
 
-  const apiCallForClearChat = () => {
+  const handleClearAllChat = () => {
+    setIsLoading(true);
     dispatch(
       clearChatRequest({
-        url: `messages/chat-All-Clear/${userInfo.userId}`,
+        url: `messages/chat-All-Clear/${recieverData?.id}`,
         userToken,
       })
     );
+    setTimeout(() => {
+      setIsLoading(false);
+      apiCallForGetChat();
+      setModalVisible(false);
+      setIsVisibleClearAllModal(false);
+    }, 2000)
   };
 
   const handleEdit = () => {
@@ -290,17 +314,30 @@ const Chats = ({ route }: any) => {
     setMessageText(selectedMessage?.content);
     setModalVisible(false);
   };
-
+  
   return (
     <KeyboardAvoidingView
       keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 40}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={style.container}
     >
-      <Header />
+      <Header
+        title={recieverData?.username}
+        source={{ uri: recieverData?.profilePhotoUrls[0] }}
+        onPressDots={() => {
+          setModalVisible(true);
+          setIsVisibleClearAllModal(true);
+        }}
+      />
+      {isLoading && (
+        <ActivityIndicator style={style.activityIndicatior} size={"large"} />
+      )}
       <Modal
         isVisible={isModalVisible}
-        onBackdropPress={() => setModalVisible(false)}
+        onBackdropPress={() => {
+          setModalVisible(false);
+          setIsVisibleClearAllModal(false);
+        }}
         style={{ justifyContent: "center", alignItems: "center" }}
       >
         <View
@@ -309,16 +346,35 @@ const Chats = ({ route }: any) => {
             backgroundColor: "white",
             padding: 15,
             borderRadius: 10,
-            alignItems: "center"
+            alignItems: "center",
           }}
         >
-          <TouchableOpacity onPress={handleEdit} style={{ padding: 10 }}>
-            <Text style={{ fontSize: 16 }}>Edit Message</Text>
-          </TouchableOpacity>
-          <View style={{ height: 1, width: "100%", backgroundColor: "#ccc" }} />
-          <TouchableOpacity onPress={apiCallForDeleteMessage} style={{ padding: 10 }}>
-            <Text style={{ fontSize: 16, color: "red" }}>Delete Message</Text>
-          </TouchableOpacity>
+          {isVisibleClearAllModal && (
+            <TouchableOpacity
+              onPress={handleClearAllChat}
+              style={{ padding: 10 }}
+            >
+              <Text style={{ fontSize: 16 }}>Clear All Chat</Text>
+            </TouchableOpacity>
+          )}
+            {!isVisibleClearAllModal && (
+              <>
+                <TouchableOpacity onPress={handleEdit} style={{ padding: 10 }}>
+                  <Text style={{ fontSize: 16 }}>Edit Message</Text>
+                </TouchableOpacity>
+                <View
+                  style={{ height: 1, width: "100%", backgroundColor: "#ccc" }}
+                />
+                <TouchableOpacity
+                  onPress={apiCallForDeleteMessage}
+                  style={{ padding: 10 }}
+                >
+                  <Text style={{ fontSize: 16, color: "red" }}>
+                    Delete Message
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
         </View>
       </Modal>
       <View style={style.chatContainer}>
@@ -335,7 +391,7 @@ const Chats = ({ route }: any) => {
             )
           }
           showsVerticalScrollIndicator={false}
-          inverted={true}
+          // inverted={true}
           removeClippedSubviews={false}
         />
         <View style={style.inputContainer}>
@@ -356,10 +412,18 @@ const Chats = ({ route }: any) => {
               onSubmitEditing={() => handleEditPress()}
             />
           </View>
-          <TouchableOpacity style={style.send} onPress={() => {
-           isEditMessage ? handleEditPress() :  onSendPress();
-          }} > 
-            <Icon icon={ICONS.send} iconStyle={style.iconSize} />
+          <TouchableOpacity
+            style={style.send}
+            onPress={() => {
+              isEditMessage ? handleEditPress() : onSendPress();
+            }}
+          >
+            <Image source={ICONS.send} style={{
+              height: verticalScale(22),
+              aspectRatio: 1,
+              objectFit: 'contain',
+              tintColor: "white"
+            }} />
           </TouchableOpacity>
         </View>
       </View>

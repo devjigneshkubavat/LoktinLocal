@@ -7,6 +7,7 @@ import {
   setPostList,
   setReportList,
 } from "../slices/postSlice";
+import { showToast } from "@/utils/helper";
 
 interface ApiResponse {
   [key: string]: any;
@@ -41,7 +42,7 @@ function* sendReport(action: any) {
         },
       }
     );
-    // showToast(response);
+    showToast(response);
     console.log("sendReport response", response);
     yield put(setReportList(response.data));
   } catch (error) {

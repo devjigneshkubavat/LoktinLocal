@@ -30,6 +30,7 @@ import Preference from "@/screens/App/preference";
 import Safeword from "@/screens/App/safeword";
 import prompts from "@/screens/App/prompts";
 import SetSafeword from "@/screens/App/setsafeword";
+import CreatePost from "@/screens/App/CreatePost";
 
 export const SCREENS = {
     SplashScreen,
@@ -63,5 +64,6 @@ export const SCREENS = {
     Preference,
     Safeword,
     prompts,
-    SetSafeword
+    SetSafeword,
+    CreatePost
 }

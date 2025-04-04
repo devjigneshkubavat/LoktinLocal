@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { View, Image, TouchableOpacity } from "react-native";
+import { View, Image, TouchableOpacity, Text } from "react-native";
 import { styles } from "./styles";
 import { useTheme } from "@/hooks/useTheme";
 import Icon from "@/components/Icon";
@@ -12,17 +12,18 @@ import {
   getPostsListRequest,
   sendReportRequest,
 } from "@/redux/slices/postSlice";
+import { useIsFocused } from "@react-navigation/native";
 
-const PostList = () => {
+const PostList = ({onPressPlusIcon}) => {
   const { theme } = useTheme();
   const dispatch = useDispatch<AppDispatch>();
+  const isFocused = useIsFocused();
 
   const style = useMemo(() => styles(theme), [theme]);
   const { userInfo } = useSelector((state: RootState) => state.user);
   const { userToken } = useSelector((state: RootState) => state.auth);
   const { postsList } = useSelector((state: RootState) => state.post);
-
-  console.log("postsList", postsList);
+  
 
   useEffect(() => {
     dispatch(
@@ -31,7 +32,7 @@ const PostList = () => {
         userToken,
       })
     );
-  }, []);
+  }, [isFocused]);
 
   return (
     <View style={style.boxContainer}>
@@ -41,8 +42,8 @@ const PostList = () => {
       {/* {userInfo.profilePhotoUrls?.map((item) => (
         <FastImage source={{ uri: item }} style={style.boxImage} />
       ))} */}
-      <TouchableOpacity style={style.boxImage}>
-        <Icon icon={ICONS.plus} iconStyle={style.plusIcon} />
+      <TouchableOpacity style={style.boxImage} onPress={onPressPlusIcon}>
+        <Image source={ICONS.plus} style={style.plusIcon} />
       </TouchableOpacity>
     </View>
   );

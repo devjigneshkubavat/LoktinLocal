@@ -78,6 +78,10 @@ const AppStack = () => {
                     component={SCREENS.MessageModeration}
                     name={NAMES.messageModeration}
                 />
+                <Stack.Screen
+                    component={SCREENS.CreatePost}
+                    name={NAMES.createPost}
+                />
             </Stack.Group>
         </Stack.Navigator>
     )
