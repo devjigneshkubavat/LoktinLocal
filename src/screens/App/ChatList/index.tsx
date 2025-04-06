@@ -108,34 +108,42 @@ const ChatList = () => {
   const RenderItem: React.FC<{ item: ChatListItem; index: number }> = ({
     item,
     index,
-  }) => (
-    <TouchableOpacity
-      style={style.listView}
-      onPress={() =>
-        navigation.navigate(NAMES.chats, { recieverData: item.user })
-      }
-    >
-      <View style={style.imageContainer}>
-        <Image
-          style={style.image}
-          source={{
-            uri: "https://randomuser.me/api/portraits/men/1.jpg",
-          }}
-        />
-      </View>
-      <View style={style.detailsView}>
-        <Text style={style.nameText}>{item.user.username}</Text>
-        <Text style={style.detailsText}>{item.lastMessage.content}</Text>
-      </View>
-      <View style={{ alignItems: "center" }}>
-        <Text>{getTimeDifference(item.lastMessage.timestamp)}</Text>
-        <View style={style.badge}>
-          <Text style={style.badgeText}>{1}</Text>
+  }) => {
+    
+    return (
+      <TouchableOpacity
+        style={style.listView}
+        onPress={() =>
+          navigation.navigate(NAMES.chats, { recieverData: item.user })
+        }
+      >
+        <View style={style.imageContainer}>
+          {item?.user?.profilePhotoUrls[0] && (
+            <Image
+              style={style.image}
+              source={{
+                uri: item?.user?.profilePhotoUrls[0],
+              }}
+            />
+          )}
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={style.detailsView}>
+          <Text style={style.nameText}>{item.user.username}</Text>
+          <Text style={style.detailsText}>{item.lastMessage.content}</Text>
+        </View>
+        <View style={{ alignItems: "center" }}>
+          <Text>{getTimeDifference(item.lastMessage.timestamp)}</Text>
+          <View style={style.badge}>
+            <Text style={style.badgeText}>{1}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  }
 
+
+  // console.log('chatsList',chatsList);
+  
   return (
     <View style={style.container}>
       <Header

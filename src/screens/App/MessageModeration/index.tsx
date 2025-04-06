@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import React, { useMemo, useState } from "react";
 import Header from "@/components/Header";
@@ -17,13 +18,18 @@ import Button from "@/components/Button";
 import { sendReportRequest } from "@/redux/slices/postSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
+import CustumLoader from "@/components/Loader/CustumLoader";
 
 const MessageModeration = () => {
   const { theme } = useTheme();
   const dispatch = useDispatch<AppDispatch>();
 
   const styles = useMemo(() => style(theme), [theme]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [experienceInput, setExperienceInput] = useState<string>("");
+  const [isBugReport, setIsBugReport] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
 
   const { userToken } = useSelector((state: RootState) => state.auth);
 
@@ -33,9 +39,10 @@ const MessageModeration = () => {
 
   const handleSubmit = () => {
     const message = {
-      reportMassge: " hello",
-      IsbugReport: true
+      reportMassge: experienceInput || "",
+      IsbugReport: isBugReport
     };
+    setIsLoading(true);
     dispatch(
       sendReportRequest({
         url: "report/send-report",
@@ -43,7 +50,12 @@ const MessageModeration = () => {
         data: message,
       })
     );
-    setModalVisible((prev) => !prev);
+  setModalVisible((prev) => !prev);
+   setTimeout(() => {
+    setIsBugReport(false);
+    setExperienceInput("");
+    setIsLoading(false);
+   }, 2000)
   };
 
   return (
@@ -57,6 +69,9 @@ const MessageModeration = () => {
           icon: ICONS.left_arrow,
         }}
       />
+      {isLoading && 
+        <ActivityIndicator size={"large"} style={styles.activityIndicatior}/>
+      }
       <View style={styles.item}>
         <View>
           <Text style={styles.title}>What do you want to report?</Text>
@@ -72,11 +87,19 @@ const MessageModeration = () => {
           </Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.item} onPress={handleModal}>
+      <TouchableOpacity style={styles.item} 
+      onPress={() => {
+        handleModal();
+        setIsBugReport(true);
+      }}>
         <Text style={styles.itemTitle}>Report a bug</Text>
         <Image source={ICONS.rightArrow} style={styles.rightImage} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.item} onPress={handleModal}>
+      <TouchableOpacity style={styles.item} 
+       onPress={() => {
+        handleModal();
+        setIsBugReport(false);
+      }}>
         <Text style={styles.itemTitle}>Report a user</Text>
         <Image source={ICONS.rightArrow} style={styles.rightImage} />
       </TouchableOpacity>
@@ -99,6 +122,8 @@ const MessageModeration = () => {
               placeholder="Share your experience."
               textAlign={"left"}
               numberOfLines={4}
+              value={experienceInput}
+              onChangeText={setExperienceInput}
             />
             <Button
               title="Submit"

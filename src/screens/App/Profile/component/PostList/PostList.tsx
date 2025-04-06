@@ -14,7 +14,7 @@ import {
 } from "@/redux/slices/postSlice";
 import { useIsFocused } from "@react-navigation/native";
 
-const PostList = ({onPressPlusIcon}) => {
+const PostList = ({ onPressPlusIcon }) => {
   const { theme } = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const isFocused = useIsFocused();
@@ -23,7 +23,8 @@ const PostList = ({onPressPlusIcon}) => {
   const { userInfo } = useSelector((state: RootState) => state.user);
   const { userToken } = useSelector((state: RootState) => state.auth);
   const { postsList } = useSelector((state: RootState) => state.post);
-  
+
+  console.log("postsList", postsList);
 
   useEffect(() => {
     dispatch(
@@ -34,10 +35,18 @@ const PostList = ({onPressPlusIcon}) => {
     );
   }, [isFocused]);
 
+  const renderSource = (item) => {
+    const baseURL = 'https://api.loktin.app/';
+    return item?.path?.includes('api.loktin.app') ? item.path : `${baseURL}${item?.path}`;
+  };
+
   return (
     <View style={style.boxContainer}>
       {postsList?.map((item) => (
-        <FastImage source={{ uri: `https://api.loktin.app/${item?.path}` }} style={style.boxImage} />
+        <FastImage
+          source={{ uri: renderSource(item) }}
+          style={style.boxImage}
+        />
       ))}
       {/* {userInfo.profilePhotoUrls?.map((item) => (
         <FastImage source={{ uri: item }} style={style.boxImage} />

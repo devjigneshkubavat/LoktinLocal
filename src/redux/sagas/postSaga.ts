@@ -8,6 +8,7 @@ import {
   setReportList,
 } from "../slices/postSlice";
 import { showToast } from "@/utils/helper";
+import { ICONS } from "@/constants";
 
 interface ApiResponse {
   [key: string]: any;
@@ -42,7 +43,10 @@ function* sendReport(action: any) {
         },
       }
     );
-    showToast(response);
+    showToast(response, {
+      position: 'top',
+      icon: ICONS.successIcon
+    });
     console.log("sendReport response", response);
     yield put(setReportList(response.data));
   } catch (error) {

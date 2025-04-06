@@ -221,10 +221,45 @@ const Chats = ({ route }: any) => {
       return [{ type: "header", date }, ...messages];
     });
   
-    return sortedMessages.flat()
+    return sortedMessages.flat().reverse()
   };
   
   const chatData = groupedMessages();
+
+  function sortMessages(data) {
+  let filteredMessages = data.filter(msg => msg.type !== "header");
+
+    // Step 2: Sort messages by createdAt (ascending order)
+    filteredMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    // Step 3: Insert missing headers
+    let result = [];
+    let lastDate = null;
+
+    filteredMessages.forEach(msg => {
+        // Extract message date in "DD MMM YYYY" format
+        let messageDate = new Date(msg.createdAt).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+
+        // If a new date is encountered, add a header before the message
+        if (messageDate !== lastDate) {
+            result.push({ type: "header", date: messageDate });
+            lastDate = messageDate;
+        }
+
+        // Add the actual message
+        result.push(msg);
+    });
+
+    return result;
+}
+
+
+
+const sortedMessages = sortMessages(chatData);
 
 
   const onSendPress = () => {
@@ -379,7 +414,7 @@ const Chats = ({ route }: any) => {
       </Modal>
       <View style={style.chatContainer}>
         <FlatList
-          data={chatData}
+          data={sortedMessages || chatData}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) =>
             item.type === "header" ? (

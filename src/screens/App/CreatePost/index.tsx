@@ -78,7 +78,7 @@ const CreatePost = () => {
       height: 400,
       cropping: true,
     }).then((response) => {
-      console.log(response.filename);
+      console.log(response);
 
       SetInput((pre) => ({ ...pre, Imagemodal: false }));
       SetInput((pre) => ({
@@ -87,6 +87,7 @@ const CreatePost = () => {
           base64: "",
           uri: response.path,
           filename: response.filename || "",
+          mime: response?.mime
         },
       }));
     });
@@ -100,8 +101,8 @@ const CreatePost = () => {
 
     formData.append("image", {
       uri: Input?.SelectedImage?.uri,
-      name: "upload.jpg",
-      type: "image/jpeg",
+      name: Input?.SelectedImage?.filename,
+      type: Input?.SelectedImage?.mime || "image/jpeg",
     });
     setIsLoading(true);
     try {
