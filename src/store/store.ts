@@ -16,7 +16,7 @@ import rootSaga from "@/redux/sagas";
 import authReducer from "../redux/slices/authSlice";
 import userReducer from "../redux/slices/userSlice";
 import planReducer from "../redux/slices/planSlice";
-const sagaMiddleware = createSagaMiddleware();
+const sagaMiddleware:any = createSagaMiddleware();
 import cartReducer from "../redux/slices/cartSlice";
 import chatReducer from "../redux/slices/chatSlice";
 import postReducer from "../redux/slices/postSlice";
@@ -48,7 +48,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
+  middleware: (getDefaultMiddleware: any) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],

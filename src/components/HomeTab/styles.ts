@@ -22,13 +22,16 @@ export const styles = ({ colors }:Theme) => StyleSheet.create({
         color: COLORS.primaryColor, // Light brown color for active tab
       },
       tabView: {
-       paddingBottom: verticalScale(10),
-       paddingHorizontal: horizontalScale(5),
-       borderBottomWidth: 1,
-       borderBottomColor: colors.white,
+      //  paddingBottom: verticalScale(10),
+       paddingHorizontal: horizontalScale(15),
       },
       activeTabLine: {
-        borderBottomColor:COLORS.primaryColor
+        height: 2,
+        backgroundColor: COLORS.primaryColor,
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+
       }
 });
 

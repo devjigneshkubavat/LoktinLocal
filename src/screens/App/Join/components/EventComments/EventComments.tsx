@@ -7,6 +7,8 @@ import { COLORS } from "@/constants/colors";
 import Icon from "@/components/Icon";
 import { ICONS } from "@/constants";
 import FastImage from "react-native-fast-image";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface CommentsProps {
   comments: CommentDataProps[];
@@ -18,6 +20,7 @@ const EventComments = (props: CommentsProps) => {
   const { theme } = useTheme();
   const style = useMemo(() => styles(theme), [theme]);
   const [comment, setComment] = useState<string>("");
+  const { userInfo } = useSelector((state: RootState) => state.user);
 
   const onAddComment = () => {
     if (!comment) return;
@@ -34,12 +37,18 @@ const EventComments = (props: CommentsProps) => {
         comments?.map((comment) => (
           <View key={comment?.id} style={style.comment}>
             <FastImage
-              source={{ uri: comment?.user?.profilePhotoUrls?.[0] }}
+              source={{
+                uri:
+                  comment?.user?.profilePhotoUrls?.[0] ??
+                  userInfo?.profilePhotoUrls?.[0],
+              }}
               style={style.avatar}
             />
             <View style={style.commentContent}>
               <View style={style.commentTitle}>
-                <Text style={style.username}>@{comment?.user?.username}</Text>
+                <Text style={style.username}>
+                  @{comment?.user?.username ?? userInfo.username}
+                </Text>
                 <Text style={style.timeAgo}>{comment?.timeAgo}</Text>
               </View>
               <Text style={style.commentText} numberOfLines={2}>

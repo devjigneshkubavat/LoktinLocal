@@ -75,6 +75,7 @@ export const styles = ({ colors }: Theme) => StyleSheet.create({
         borderRadius: 8,
         padding: 20,
         backgroundColor: colors.sectionBg,
+        width:'100%'
     },
     passionsTitle: {
         color: colors.fontblackColor,

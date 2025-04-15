@@ -101,6 +101,13 @@ export const postSlice = createSlice({
     setKickOutUser: (state, action) => {
       state.isLoading = false;
     },
+    onGetPrefrences: (state, action) => {
+      state.isLoading = true;
+    },
+    setPrefernceData: (state, action) => {
+      state.isLoading = false;
+      console.log("🚀 ~ action:", action);
+    },
   },
 });
 
@@ -122,5 +129,7 @@ export const {
   onMarkAsFavoritePost,
   onKickOutUser,
   setKickOutUser,
+  onGetPrefrences,
+  setPrefernceData,
 } = postSlice.actions;
 export default postSlice.reducer;

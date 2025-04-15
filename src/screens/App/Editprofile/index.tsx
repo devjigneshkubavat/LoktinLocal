@@ -27,6 +27,7 @@ import { onUpdateprofile, selectUser } from '@/redux/slices/userSlice'
 import Loader from '@/components/Loader'
 import { generateLabelArray, generateLabelString } from '@/utils/helper'
 import ImagePickerModal from 'react-native-image-picker-modal'
+import FastImage from 'react-native-fast-image'
 
 type UserData = {
     [key: string]: any; // Allows dynamic access, but removes type safety
@@ -208,7 +209,7 @@ const Editprofile = () => {
                 <View>
                     <View style={styless.imageContainer}>
                         <View style={styless.imageview}>
-                            <Image source={ProfileImage ? { uri: ProfileImage } : ICONS.dummy} style={styless.image} />
+                            <FastImage source={ProfileImage ? { uri: ProfileImage } : ICONS.dummy} style={styless.image} />
                             <TouchableOpacity style={styless.addimageview} onPress={() => { setImageModalVisible(true) }}>
                                 <Image
                                     style={styless.addimage}

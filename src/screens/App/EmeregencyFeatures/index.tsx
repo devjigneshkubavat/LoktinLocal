@@ -11,6 +11,7 @@ import BoxComponent from "@/hoc/OuterView";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { updateSecuritySettings, updateSecuritySettingsRequest } from "@/redux/slices/updateSecuritiesSlice";
+import { BlurView } from "@react-native-community/blur";
 
 const EmeregencyFeatures = () => {
   const { theme } = useTheme();
@@ -151,12 +152,12 @@ const EmeregencyFeatures = () => {
                   //     overflow: 'hidden'
                   // }}
                   >
-                    {/* <BlurView
-                                            blurType='light'
-                                            style={styless.absoult}
-                                            blurAmount={1}
-                                        /> */}
                     <Text style={styless.valuetext}>{item.value}</Text>
+                    {item.blur && <BlurView
+                      style={styless.absoult}
+                      blurType="light"
+                      blurAmount={10}
+                    />}
                   </View>
                   {item.arrow && (
                     <Image

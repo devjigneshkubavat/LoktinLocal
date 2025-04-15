@@ -17,6 +17,7 @@ export const style = ({ colors }: Theme) =>
     },
     leftsidestyle: {
       width: horizontalScale(100),
+      flexDirection: "row",
     },
     iconStyle: {
       flexDirection: "row",

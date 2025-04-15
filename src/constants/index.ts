@@ -72,7 +72,6 @@ export const ICONS = {
   downbtn: require("@/assets/icons/downbtn.png"),
   dummyProfile: require("@/assets/image/dummyImage.jpg"),
   kickOut: require("@/assets/icons/kickoutIcon.png"),
-  instagram: require('@/assets/icons/instagram.png'),
 };
 export const FONTS = {
   Lexend_Thin: "Lexend-Thin", // 100

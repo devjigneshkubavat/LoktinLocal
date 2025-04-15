@@ -6,6 +6,7 @@ import {
   onGetCreatedPlanList,
   onGetFavoritePlan,
   onGetJoinPlan,
+  onGetPrefrences,
   onKickOutUser,
   onMarkAsFavoritePost,
   sendReportRequest,
@@ -15,6 +16,7 @@ import {
   setKickOutUser,
   setMarkAsFavoritePost,
   setPostList,
+  setPrefernceData,
   setReportList,
 } from "../slices/postSlice";
 import { showToast } from "@/utils/helper";
@@ -117,6 +119,24 @@ function* watchFavoritePlan(action: any) {
   }
 }
 
+function* watchGetPrefernce(action: any) {
+  const { payload } = action;
+  try {
+    const response: ApiResponse = yield call(baseApi.get, payload.url, {
+      headers: {
+        Authorization: `Bearer ${payload.userToken}`,
+      },
+    });
+    if (response) {
+      console.log("🚀 ~ function*watchGetPrefernce ~ response:", response);
+      yield put(setPrefernceData(response?.response?.data));
+    }
+  } catch (error) {
+    console.error("Error watchOrganizerProfile:", error);
+    yield put(setPrefernceData({}));
+  }
+}
+
 function* watchLeaveGroup(action: any) {
   const { payload } = action;
   console.log("payload ===>", payload);
@@ -204,4 +224,5 @@ export default function* post() {
   yield takeLatest(onLeaveGroup.type, watchLeaveGroup);
   yield takeLatest(onMarkAsFavoritePost.type, watchToMarkAsFavorite);
   yield takeLatest(onKickOutUser.type, watchToKickoutUser);
+  yield takeLatest(onGetPrefrences.type, watchGetPrefernce);
 }

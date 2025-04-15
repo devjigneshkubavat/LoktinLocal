@@ -62,6 +62,8 @@ export const styles = ({ colors }: Theme) => StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
+        backgroundColor:COLORS.borderColor,
+        borderRadius:5
     }
 })
 

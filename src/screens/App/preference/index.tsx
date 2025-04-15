@@ -1,6 +1,6 @@
 import BoxComponent from "@/hoc/OuterView";
 import { useTheme } from "@/hooks/useTheme";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import style from "./style";
 import Header from "@/components/Header";
@@ -29,6 +29,7 @@ import {
 import Toast from "react-native-toast-message";
 import FastImage from "react-native-fast-image";
 import { setPlanDetails } from "@/redux/slices/planSlice";
+import { onGetPrefrences } from "@/redux/slices/postSlice";
 
 const Preference = () => {
   const route = useRoute<RouteProp<ParamListTypes, "preference">>();
@@ -42,10 +43,10 @@ const Preference = () => {
   const { planDetails, userInfo } = useSelector(
     (state: RootState) => state.user
   );
-  console.log("🚀 ~ Preference ~ planDetails:", planDetails);
+
   const { planData } = useSelector((state: RootState) => state.plan);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<number>(groupId ?? 1);
+  const [selectedGroup, setSelectedGroup] = useState<number>(groupId!);
 
   const detail = [
     {
@@ -186,14 +187,22 @@ const Preference = () => {
       dispatch(
         setPlanDetails({
           ...planData,
-          groupEntries: [
-            {
-              id: selectedGroup,
-              ...data,
-            },
-          ],
+          groupEntries: (() => {
+            const groupFound = (planData as any)?.groupEntries || [];
+            const found = groupFound.some(
+              (entry: any) => entry.id === selectedGroup
+            );
+            if (found) {
+              return groupFound.map((entry: any) =>
+                entry.id === selectedGroup ? { ...entry, ...data } : entry
+              );
+            } else {
+              return [...groupFound, { id: selectedGroup, ...data }];
+            }
+          })(),
         })
       );
+
       goBack();
     }
   };
@@ -202,10 +211,26 @@ const Preference = () => {
     SetInput({ ...Input, gender: value });
   };
 
+  useEffect(() => {
+    if (planDetails?.id) {
+      dispatch(
+        onGetPrefrences({
+          url: `plans/${planDetails?.id}/group-entries`,
+          userToken,
+        })
+      );
+    }
+  }, []);
+
   return (
     <ScrollView style={styless.container}>
       <Header
         lefttext={true}
+        leftIcon={true}
+        leftView={{
+          onPress: () => goBack(),
+          icon: ICONS.left_arrow,
+        }}
         viewstyle={styless.headerstyle}
         leftstyle={styless.leftsidestyle}
         leftsidetext="Preference"
@@ -325,7 +350,7 @@ const Preference = () => {
           <View
             style={[
               styless.boxContainer,
-              planDetails?.groupSize ?? planData?.groupSize == 2
+              (planDetails?.groupSize ?? planData?.groupSize) == 2
                 ? styless.pairContainer
                 : styless.groupContainer,
             ]}

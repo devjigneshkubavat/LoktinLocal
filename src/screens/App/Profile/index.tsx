@@ -11,7 +11,7 @@ import {
   View,
 } from "react-native";
 import Header from "@/components/Header";
-import { goBack, navigation } from "@/navigation/rootNavigation";
+import { goBack, navigate, navigation } from "@/navigation/rootNavigation";
 import { ICONS, INTERESTS } from "@/constants";
 import Button from "@/components/Button";
 import PostList from "./component/PostList/PostList";
@@ -264,9 +264,16 @@ const Profile = () => {
             eventList={createdPlanList}
             isLoading={loading}
             onFavoritePress={
-              !userID ? (planID, isFavourite) =>
-              onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Created): undefined
+              !userID
+                ? (planID, isFavourite) =>
+                    onMarkAsFavoritePlan(
+                      planID,
+                      !isFavourite,
+                      EProfileTab.Created
+                    )
+                : undefined
             }
+            onEventPress={(planID) => navigate(NAMES.join, { planID })}
           />
         );
       case EProfileTab.Joined:
@@ -275,9 +282,16 @@ const Profile = () => {
             eventList={joinedPlanList}
             isLoading={loading}
             onFavoritePress={
-              !userID ? (planID, isFavourite) =>
-              onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Created): undefined
+              !userID
+                ? (planID, isFavourite) =>
+                    onMarkAsFavoritePlan(
+                      planID,
+                      !isFavourite,
+                      EProfileTab.Created
+                    )
+                : undefined
             }
+            onEventPress={(planID) => navigate(NAMES.join, { planID })}
           />
         );
     }
@@ -332,8 +346,11 @@ const Profile = () => {
             eventList={createdPlanList}
             isLoading={loading}
             onFavoritePress={(planID, isFavourite) =>
-              onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Created)
+             {
+              // !userID && onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Created)
+             }
             }
+            onEventPress={(planID) => navigate(NAMES.join, { planID })}
           />
         );
 
@@ -360,8 +377,11 @@ const Profile = () => {
             eventList={joinedPlanList}
             isLoading={loading}
             onFavoritePress={(planID, isFavourite) =>
-              onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Joined)
+              {
+                // !userID && onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Joined)
+              }
             }
+            onEventPress={(planID) => navigate(NAMES.join, { planID })}
           />
         );
       case EProfileTab.Favorites:
@@ -370,21 +390,24 @@ const Profile = () => {
             eventList={favoriteList}
             onFavoritePress={(planID) => markUnFavoritePlan(planID)}
             isLoading={isFavoriteLoading}
+            onEventPress={(planID) => navigate(NAMES.join, { planID })}
+            isfromFavourite={true}
           />
         );
     }
   };
 
   const mappedInterests = useMemo(() => {
-    if (!userInfo?.interests || userInfo?.interests?.length === 0) return [];
+    const interestData = userID ? organizarProfile?.interests : userInfo.interests
+    if (!interestData || interestData?.length === 0) return [];
 
-    return userInfo?.interests
+    return interestData
       .map(({ interest_name }) => {
         const interest = INTERESTS.find(({ label }) => label === interest_name);
         return interest ? interest : { emoji: "❓", label: interest_name };
       })
       .filter(Boolean);
-  }, [userInfo.interests]);
+  }, [userInfo.interests, organizarProfile?.interests]);
 
   return (
     <>
@@ -424,12 +447,9 @@ const Profile = () => {
               <Text style={style.handle}>
                 {organizarProfile?.username ?? userInfo?.username}
               </Text>
-              {organizarProfile?.userBio ||
-                (userInfo.userBio && (
-                  <Text style={style.bio}>
-                    {organizarProfile?.userBio ?? userInfo.userBio ?? ""}
-                  </Text>
-                ))}
+              {(organizarProfile?.userBio || userInfo.userBio) && <Text style={style.bio}>
+                {(userID && organizarProfile?.userBio) ?? userInfo.userBio ?? ""}
+              </Text>}
               {!userID ? (
                 <Button
                   title={"Edit profile"}
@@ -437,7 +457,7 @@ const Profile = () => {
                   textStyle={style.btnText}
                   onPress={() => navigation.navigate(NAMES.editprofile)}
                 />
-              ) : (
+              ) : userID && organizarProfile?.update_Securities?.howCanMessageMe && (organizarProfile?.update_Securities?.howCanMessageMe != 'NoOne') && (
                 <Button
                   title={"Message"}
                   viewstyle={style.bottomView}

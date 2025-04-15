@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import {JSX} from 'react';
 import {
   GestureResponderEvent,
   ImageProps,
@@ -7,8 +7,8 @@ import {
   TextInputProps,
   TextStyle,
   ViewStyle,
-} from "react-native";
-import { MaskedTextInputProps } from "react-native-advanced-input-mask";
+} from 'react-native';
+import {MaskedTextInputProps} from 'react-native-advanced-input-mask';
 
 export interface ButtonProps {
   title: string;
@@ -78,6 +78,15 @@ export type Interest = {
   id: number;
   interest_name: string;
 };
+export type UpdateSecurity = {
+  phoneNumber?: any;
+  isEmergencyAllowed?: boolean;
+  isLocationSharingAllowed?: boolean;
+  isCheckInPointAllowed?: boolean;
+  safeWord: any[];
+  receiveCheckInReminders?: any;
+  howCanMessageMe?: any;
+};
 export type UserData = {
   username?: string;
   firstName?: string;
@@ -95,6 +104,7 @@ export type UserData = {
   show_online_status?: boolean;
   two_factor_authentication?: boolean;
   ProfilePhoto?: string;
+  update_Securities?: UpdateSecurity;
 };
 export type ModalProps = {
   isVisible?: boolean;
@@ -153,6 +163,7 @@ export interface getAllPreferences {
   groupEntries?: GroupEntriesEntity[] | null;
   dateTime: any;
   planId?: number;
+  plan?:any
 }
 export interface userDetails {
   id: number;
@@ -208,10 +219,10 @@ export type ConfirmModal = {
 };
 
 export type ParamListTypes = {
-  join: { planId: number };
-  createPlan: { isUpdate?: boolean };
-  preference: { groupId?: number };
-  profile: { userId?: number };
+  join: {planId: number};
+  createPlan: {isUpdate?: boolean};
+  preference: {groupId?: number};
+  profile: {userId?: number};
 };
 
 export interface RequestListProps {
@@ -304,6 +315,6 @@ export interface MessageItem {
   receiverId: number;
   createdAt: string;
   updatedAt: string;
-  type?: "header";
+  type?: 'header';
   date?: string;
 }

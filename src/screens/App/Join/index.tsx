@@ -116,9 +116,9 @@ const Join = () => {
     console.log("Delete Pressed");
   };
 
-  const handlePreference = (id: any) => {
+  const handlePreference = () => {
     setIsPreferenceVisible(false);
-    navigate(NAMES.preferences, { groupId: id });
+    navigate(NAMES.preferences);
   };
 
   const renderHeaderRightView = () => {
@@ -160,7 +160,7 @@ const Join = () => {
                 style={style.menuItem}
                 onPress={() => {
                   setIsVisible(false);
-                  handlePreference(planDetails?.groupEntries?.[0]?.id);
+                  handlePreference();
                 }}
               >
                 <Icon disabled icon={ICONS.Grid} iconStyle={style.editIcon} />

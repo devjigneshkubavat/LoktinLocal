@@ -78,7 +78,7 @@ const Search = () => {
   const renderPlanList = ({ item }: { item: getAllPreferences[] }) => {
     if (item?.length == 0) return renderListEmptyView();
     return (
-      <ScrollView style={{ padding: 10 }}>
+      <ScrollView style={{ marginVertical: 20 }}>
         <EventList
           eventList={item}
           key={Math?.random()?.toFixed()}
@@ -138,7 +138,10 @@ const Search = () => {
           <Icon icon={ICONS.searchIcon} iconStyle={style.icons} />
           <TextInput
             value={SearchText}
-            onChangeText={onChangeSearchText}
+            onChangeText={(text) => {
+              setIsShowSearchedData(false);
+              onChangeSearchText(text);
+            }}
             style={style.searchInput}
             placeholder="Search for a plans"
             placeholderTextColor={COLORS.fontblackColor}
@@ -150,7 +153,7 @@ const Search = () => {
           />
         </View>
       </View>
-      {!isShowSearchedData && SearchText && suggetionList?.length != 0 && (
+      {!isShowSearchedData && SearchText && suggetionList?.length != 0 ? (
         <View
           style={{
             position: "absolute",
@@ -166,8 +169,10 @@ const Search = () => {
             ListEmptyComponent={renderListEmptyView}
           />
         </View>
+      ) : (
+        renderPlanList({ item: searchPlanList })
       )}
-      {isShowSearchedData && renderPlanList({ item: searchPlanList })}
+      {/* {isShowSearchedData && renderPlanList({ item: searchPlanList })} */}
     </View>
   );
 };

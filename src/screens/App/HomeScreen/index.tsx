@@ -35,6 +35,7 @@ import { signOut } from "@/redux/services/authServices";
 import { format } from "date-fns";
 import Icon from "@/components/Icon";
 import { getCurrentPosition, requestLocationPermission } from "@/utils/helper";
+import { useIsFocused } from "@react-navigation/native";
 
 const HomeScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -48,6 +49,7 @@ const HomeScreen = () => {
   console.log("🚀 ~ HomeScreen ~ preferencesListData:", preferencesListData);
   const [selectedTab, setSelectedTab] = useState("all");
   const dummyImage = require("@/assets/image/demoPost.jpeg");
+  const focus = useIsFocused();
 
   const onBoxPress = (id: number) => {
     navigate(NAMES.join, {
@@ -149,10 +151,12 @@ const HomeScreen = () => {
   );
 
   useEffect(() => {
-    setSelectedTab("all");
-    getAllPlanData();
-    dispatch(setPlanDetails(undefined));
-  }, []);
+    if (focus) {
+      setSelectedTab("all");
+      getAllPlanData();
+      dispatch(setPlanDetails(undefined));
+    }
+  }, [focus]);
 
   useEffect(() => {
     const checkPermission = async () => {
