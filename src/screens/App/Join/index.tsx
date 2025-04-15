@@ -26,7 +26,7 @@ import EventComments from "./components/EventComments/EventComments";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { ParamListTypes } from "@/constants/types";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+import store, { AppDispatch, RootState } from "@/store/store";
 import Popover from "react-native-popover-view";
 import {
   getCommentList,
@@ -42,6 +42,9 @@ import { COLORS } from "@/constants/colors";
 import { NAMES } from "@/navigation/name";
 import ConfirmAlert from "@/components/ConfirmAlert";
 import Toast from "react-native-toast-message";
+import reduxStorage from "@/store/reduxStorage";
+import ReactNativeModal from "react-native-modal";
+import { onKickOutUser, setRequestTutorial } from "@/redux/slices/postSlice";
 
 const Join = () => {
   const { theme } = useTheme();
@@ -57,6 +60,7 @@ const Join = () => {
     userInfo,
     isNewCommentAdded,
     createdRequestList,
+    isFavoriteLoading,
   } = useSelector((state: RootState) => state.user);
   const [isFavourite, setIsFavourite] = useState<boolean>(
     !!planDetails?.isFavourite
@@ -73,6 +77,7 @@ const Join = () => {
   const [isPreferenceVisible, setIsPreferenceVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
+  const [isTutorialShow, setIsTutorialShow] = useState<boolean>(false);
 
   const handleIconPress = (event: any) => {
     const { pageX, pageY } = event.nativeEvent; // Get position of the touch
@@ -127,7 +132,7 @@ const Join = () => {
 
         {!isCurrentUserFound && (
           <Icon
-            icon={isFavourite ? ICONS.starFavorite : ICONS.starOutline}
+            icon={isFavourite ? ICONS.heartFavorite : ICONS.heart}
             iconStyle={[style.iconSize, isFavourite && style.starFavoriteIcon]}
             onPress={() => onMarkAsFavoritePlan(planId, !isFavourite)}
           />
@@ -143,9 +148,23 @@ const Join = () => {
             onRequestClose={() => setIsVisible(false)}
           >
             <View style={style.popoverContent}>
-              <TouchableOpacity style={style.menuItem} onPress={handleEdit}>
+              <TouchableOpacity
+                disabled
+                style={style.menuItem}
+                onPress={handleEdit}
+              >
                 <Icon disabled icon={ICONS.edit} iconStyle={style.editIcon} />
                 <Text style={style.menuText}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={style.menuItem}
+                onPress={() => {
+                  setIsVisible(false);
+                  handlePreference(planDetails?.groupEntries?.[0]?.id);
+                }}
+              >
+                <Icon disabled icon={ICONS.Grid} iconStyle={style.editIcon} />
+                <Text style={style.menuText}>Set square preferences</Text>
               </TouchableOpacity>
               <TouchableOpacity style={style.menuItem} onPress={handleDelete}>
                 <Icon
@@ -173,7 +192,13 @@ const Join = () => {
     );
   };
 
-  const createJoinRequest = (userId: number, planId: number) => {
+  const createJoinRequest = async (userId: number, planId: number) => {
+    const { isFirstTimeRequestCreated } = store.getState().post;
+
+    if (isFirstTimeRequestCreated) {
+      setIsTutorialShow(true);
+      dispatch(setRequestTutorial(false));
+    }
     if (isCurrentUserFound) {
       Toast.show({
         type: "error",
@@ -274,7 +299,7 @@ const Join = () => {
         secondbuttontext="No"
         Secondbutton={true}
       />
-      {isLoading ? (
+      {isLoading || isFavoriteLoading ? (
         <ActivityIndicator style={style.activityIndicatior} />
       ) : null}
       <ScrollView>
@@ -324,7 +349,7 @@ const Join = () => {
                           onPress={(event) => handleIconPress(event)}
                         >
                           <Icon
-                            disabled
+                            onPress={(event) => handleIconPress(event)}
                             icon={ICONS.more}
                             iconStyle={[
                               style.iconSize,
@@ -338,14 +363,27 @@ const Join = () => {
                       <View style={style.popoverContent}>
                         <TouchableOpacity
                           style={style.menuItem}
-                          onPress={() => handlePreference(item?.id)}
+                          onPress={() => {
+                            dispatch(
+                              onKickOutUser({
+                                url: "/plans/group-entries/remove-user",
+                                data: {
+                                  planId: item.planId,
+                                  userId: item.userId,
+                                  id: item.id,
+                                },
+                                userToken,
+                              })
+                            );
+                            replace("Tab");
+                          }}
                         >
                           <Icon
                             disabled
-                            icon={ICONS.Grid}
+                            icon={ICONS.kickOut}
                             iconStyle={style.gridIcon}
                           />
-                          <Text style={style.menuText}>Preference</Text>
+                          <Text style={style.menuText}>Kick</Text>
                         </TouchableOpacity>
                       </View>
                     </Popover>
@@ -375,6 +413,34 @@ const Join = () => {
             );
           })}
         </View>
+        <ReactNativeModal isVisible={isTutorialShow} backdropOpacity={0.5}>
+          <View style={style.tutorialContainer}>
+            <View style={style.tutorialBox}>
+              <TouchableOpacity
+                style={style.closeIcon}
+                onPress={() => setIsTutorialShow(false)}
+              >
+                <Text style={style.closeText}>×</Text>
+              </TouchableOpacity>
+
+              <Text style={style.title}>Join Request</Text>
+
+              <Text style={style.description}>
+                Join Requests lets you see who wants to join plans you’ve
+                created. Approve or decline requests with ease.
+              </Text>
+
+              <TouchableOpacity
+                style={style.okButton}
+                onPress={() => {
+                  setIsTutorialShow(false);
+                }}
+              >
+                <Text style={style.okButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ReactNativeModal>
 
         {planDetails?.allowComments && (
           <EventComments

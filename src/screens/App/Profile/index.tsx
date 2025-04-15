@@ -1,26 +1,50 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { styles } from "./styles";
 import { useTheme } from "@/hooks/useTheme";
 import BoxComponent from "@/hoc/OuterView";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Header from "@/components/Header";
-import { goBack } from "@/navigation/rootNavigation";
-import { ICONS } from "@/constants";
+import { goBack, navigation } from "@/navigation/rootNavigation";
+import { ICONS, INTERESTS } from "@/constants";
 import Button from "@/components/Button";
 import PostList from "./component/PostList/PostList";
 import EventList from "./component/EventList/EventList";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useIsFocused, useRoute } from "@react-navigation/native";
 import { NAMES } from "@/navigation/name";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import FastImage from "react-native-fast-image";
 import Imagemodal from "../Create/component/Uploadimagemodal/imahemodal";
-import ImagePicker from 'react-native-image-crop-picker'
+import ImagePicker from "react-native-image-crop-picker";
+
+import { ParamListTypes } from "@/constants/types";
+import {
+  onGetOrganizerProfile,
+  onMarkAsFavorite,
+  resetProfileData,
+} from "@/redux/slices/userSlice";
+import {
+  onGetCreatedPlanList,
+  onGetFavoritePlan,
+  onGetJoinPlan,
+  onMarkAsFavoritePost,
+  onUnfavoritePlan,
+  resetAllData,
+} from "@/redux/slices/postSlice";
 
 export enum EProfileTab {
   Posts = "Posts",
   Created = "Created",
   Joined = "Joined",
+  View = "View",
+  Favorites = "Favorites",
 }
 
 const tabs: EProfileTab[] = [
@@ -29,27 +53,94 @@ const tabs: EProfileTab[] = [
   EProfileTab.Joined,
 ];
 
+const viewTabs: EProfileTab[] = [EProfileTab.Created, EProfileTab.Joined];
+
+const loginUserTab: EProfileTab[] = [
+  EProfileTab.Posts,
+  EProfileTab.View,
+  EProfileTab.Favorites,
+];
+
 const Profile = () => {
-  const navigation = useNavigation();
   const { theme } = useTheme();
   const style = useMemo(() => styles(theme), [theme]);
+  const route = useRoute<RouteProp<ParamListTypes, "profile">>();
+  const userID = route.params?.userId;
+  const tab = userID ? tabs : loginUserTab;
   const [selectedTab, setSelectedTab] = useState<EProfileTab>(
     EProfileTab.Posts
   );
-      const [Input, SetInput] = useState({
-          Username: '',
-          Name: '',
-          Bio: '',
-          SelectedImage: {
-              base64: '',
-              uri: '',
-              filename: ''
-          },
-          Imagemodal: false
-      })
-  const { userInfo } = useSelector((state: RootState) => state.user);
+  const [innnerTab, setInnerTab] = useState<EProfileTab>(EProfileTab.Created);
+  const focus = useIsFocused();
+  const [Input, SetInput] = useState({
+    Username: "",
+    Name: "",
+    Bio: "",
+    SelectedImage: {
+      base64: "",
+      uri: "",
+      filename: "",
+    },
+    Imagemodal: false,
+  });
+  const dispatch = useDispatch<AppDispatch>();
+  const { userInfo, organizarProfile, isLoading, isFavoriteLoading } =
+    useSelector((state: RootState) => state.user);
+  const {
+    createdPlanList,
+    joinedPlanList,
+    favoriteList,
+    isFavoriteLoading: loading,
+  } = useSelector((state: RootState) => state.post);
 
-  
+  useEffect(() => {
+    if (!!userID) {
+      dispatch(
+        onGetOrganizerProfile({
+          url: `auth/get-user-by-id/${userID}`,
+          userToken,
+        })
+      );
+    }
+  }, [userID]);
+
+  useEffect(() => {
+    if (focus) {
+      const userId = userID ?? userInfo?.userId;
+      dispatch(
+        onGetCreatedPlanList({
+          url: `plans/get/my-plans/${userId}`,
+          userToken,
+        })
+      );
+
+      dispatch(
+        onGetJoinPlan({
+          url: `plans/get/joined-plans/${userId}`,
+          userToken,
+        })
+      );
+
+      if (!userID) {
+        dispatch(
+          onGetFavoritePlan({
+            url: `plans/interaction/favorite/${userId}`,
+            userToken,
+          })
+        );
+      }
+    }
+    return () => {
+      dispatch(resetAllData());
+    };
+  }, [focus]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetProfileData({}));
+    };
+  }, []);
+
   const dummyImage = "https://randomuser.me/api/portraits/men/1.jpg";
 
   const passions = [
@@ -64,7 +155,6 @@ const Profile = () => {
     { emoji: "🎮", text: "Gaming" },
   ];
 
-  const dispatch = useDispatch<AppDispatch>();
   const { userToken } = useSelector((state: RootState) => state.auth);
 
   // This is the function for update-securities-verifyPhone API
@@ -73,9 +163,9 @@ const Profile = () => {
   //     securityVerifyPhoneRequest({
   //       url: "/update-securities/update-securities-verifyPhone",
   //       userToken,
-  //       data: {  
-  //         phoneNumber: "+19786159222", 
-  //         otp: "50449" 
+  //       data: {
+  //         phoneNumber: "+19786159222",
+  //         otp: "50449"
   //       },
   //     })
   //   );
@@ -88,7 +178,7 @@ const Profile = () => {
   //       url: "/update-securities/update-securities-setting",
   //       userToken,
   //       data: {
-  //         isEmergencyAllowed: true, 
+  //         isEmergencyAllowed: true,
   //         isLocationSharingAllowed: false,
   //         isCheckInPointAllowed: true,
   //         safeWord:[
@@ -105,42 +195,42 @@ const Profile = () => {
 
   const opencamera = () => {
     ImagePicker.openCamera({
-        width: 300,
-        height: 400,
-        cropping: true,
-        includeBase64: true
-    }).then(response => {
-        SetInput(pre => ({ ...pre, Imagemodal: false }))
-        SetInput(pre => ({
-            ...pre,
-            SelectedImage: {
-                base64: '',
-                uri: response.path,
-                filename: response.filename || ''
-            }
-        }))
-    })
-}
+      width: 300,
+      height: 400,
+      cropping: true,
+      includeBase64: true,
+    }).then((response) => {
+      SetInput((pre) => ({ ...pre, Imagemodal: false }));
+      SetInput((pre) => ({
+        ...pre,
+        SelectedImage: {
+          base64: "",
+          uri: response.path,
+          filename: response.filename || "",
+        },
+      }));
+    });
+  };
 
-const opengallery = () => {
+  const opengallery = () => {
     ImagePicker.openPicker({
-        width: 300,
-        height: 400,
-        cropping: true
-    }).then(response => {
-        console.log(response.filename);
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then((response) => {
+      console.log(response.filename);
 
-        SetInput(pre => ({ ...pre, Imagemodal: false }))
-        SetInput(pre => ({
-            ...pre,
-            SelectedImage: {
-                base64: '',
-                uri: response.path,
-                filename: response.filename || ''
-            }
-        }))
-    })
-}
+      SetInput((pre) => ({ ...pre, Imagemodal: false }));
+      SetInput((pre) => ({
+        ...pre,
+        SelectedImage: {
+          base64: "",
+          uri: response.path,
+          filename: response.filename || "",
+        },
+      }));
+    });
+  };
 
   const PassionTag = ({ emoji, text }: { emoji: string; text: string }) => (
     <View style={style.passionTag}>
@@ -152,14 +242,13 @@ const opengallery = () => {
   const TabButton = ({
     title,
     isActive,
+    onPress,
   }: {
     title: EProfileTab;
     isActive: boolean;
+    onPress: (tab: EProfileTab) => void;
   }) => (
-    <TouchableOpacity
-      style={style.tabButton}
-      onPress={() => setSelectedTab(title)}
-    >
+    <TouchableOpacity style={style.tabButton} onPress={() => onPress(title)}>
       <Text style={[style.tabText, isActive && style.activeTabText]}>
         {title}
       </Text>
@@ -167,99 +256,225 @@ const opengallery = () => {
     </TouchableOpacity>
   );
 
-  const renderTabDetails = () => {
-    switch (selectedTab) {
-      case EProfileTab.Posts:
-        return <PostList onPressPlusIcon={() => navigation.navigate(NAMES.createPost)
-        }/>;
-        break;
+  const renderInnerTab = () => {
+    switch (innnerTab) {
       case EProfileTab.Created:
-        return <EventList />;
-        break;
+        return (
+          <EventList
+            eventList={createdPlanList}
+            isLoading={loading}
+            onFavoritePress={
+              !userID ? (planID, isFavourite) =>
+              onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Created): undefined
+            }
+          />
+        );
       case EProfileTab.Joined:
-        return <EventList />;
-        break;
+        return (
+          <EventList
+            eventList={joinedPlanList}
+            isLoading={loading}
+            onFavoritePress={
+              !userID ? (planID, isFavourite) =>
+              onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Created): undefined
+            }
+          />
+        );
     }
   };
 
-  return (
-    <View style={style.container}>
-      <Header
-        viewstyle={style.headerstyle}
-        leftIcon={true}
-        leftView={{
-          onPress: goBack,
-          icon: ICONS.left_arrow,
-        }}
-        rightIcon={true}
-        rightView={{
-          onPress: () => navigation.navigate(NAMES.settings),
-          icon: ICONS.setting,
-          // icon: ICONS.more,
-          iconStyle: style.iconStyle,
-        }}
-      />
-      <ScrollView>
-        <View style={style.profileSection}>
-          <FastImage
-            source={{
-              uri: userInfo?.profilePhotoUrls?.[0] ?? dummyImage,
-            }}
-            style={style.profileImage}
+  const markUnFavoritePlan = (planID: number) => {
+    dispatch(
+      onMarkAsFavorite({
+        url: "plans/interaction/favorite",
+        data: {
+          planId: planID,
+          isFavourite: false,
+        },
+        userToken,
+      })
+    );
+    dispatch(onUnfavoritePlan(planID));
+  };
+
+  const onMarkAsFavoritePlan = (
+    planId: number,
+    isFavourite: boolean,
+    type: string
+  ) => {
+    dispatch(
+      onMarkAsFavoritePost({
+        url: "plans/interaction/favorite",
+        data: {
+          planId: planId,
+          isFavourite: isFavourite,
+        },
+        userToken,
+        extraData: {
+          type: type,
+        },
+      })
+    );
+  };
+
+  const renderTabDetails = () => {
+    switch (selectedTab) {
+      case EProfileTab.Posts:
+        return (
+          <PostList
+            onPressPlusIcon={() => navigation.navigate(NAMES.createPost)}
+            userId={userID ?? userInfo?.userId}
           />
-          <Text style={style.name}>{userInfo?.firstName}</Text>
-          <Text style={style.handle}>{userInfo?.username}</Text>
-          <Text style={style.bio}>
-            Lorem Ipsum has been the industry's standard dummy text ever since
-            the 1500s, when an unknown printer took a galley.
-          </Text>
-          {/* <Button
-            title={"Message"}
-            viewstyle={style.bottomView}
-            textStyle={style.btnText}
-            onPress={() => navigation.navigate(NAMES.chats)}
-          /> */}
-          <Button
-            title={"Edit profile"}
-            viewstyle={style.bottomView}
-            textStyle={style.btnText}
-            onPress={() => navigation.navigate(NAMES.editprofile)}
+        );
+      case EProfileTab.Created:
+        return (
+          <EventList
+            eventList={createdPlanList}
+            isLoading={loading}
+            onFavoritePress={(planID, isFavourite) =>
+              onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Created)
+            }
           />
-          <View style={style.passionsContainer}>
-            <Text style={style.passionsTitle}>Passions</Text>
-            <View style={style.passionsGrid}>
-              {passions.map((item, index) => (
-                <PassionTag
-                  key={"passions_" + index}
-                  emoji={item.emoji}
-                  text={item.text}
+        );
+
+      case EProfileTab.View:
+        return (
+          <>
+            <View style={style.tabsContainer}>
+              {viewTabs.map((tab, index) => (
+                <TabButton
+                  key={"tab_" + index}
+                  title={tab}
+                  isActive={innnerTab === tab}
+                  onPress={(title) => setInnerTab(title)}
                 />
               ))}
             </View>
-          </View>
-        </View>
-        <View style={style.tabsContainer}>
-          {tabs.map((tab, index) => (
-            <TabButton
-              key={"tab_" + index}
-              title={tab}
-              isActive={selectedTab === tab}
-            />
-          ))}
-        </View>
-        {renderTabDetails()}
-      </ScrollView>
-      <Imagemodal
-        visible={Input.Imagemodal}
-        onrequestClose={() =>
-          SetInput((pre) => ({ ...pre, Imagemodal: false }))
-        }
-        opencamera={opencamera}
-        opengallery={opengallery}
-        onclose={() => SetInput((pre) => ({ ...pre, Imagemodal: false }))}
-        ontouchable={() => SetInput((pre) => ({ ...pre, Imagemodal: false }))}
-      />
-    </View>
+            {renderInnerTab()}
+          </>
+        );
+
+      case EProfileTab.Joined:
+        return (
+          <EventList
+            eventList={joinedPlanList}
+            isLoading={loading}
+            onFavoritePress={(planID, isFavourite) =>
+              onMarkAsFavoritePlan(planID, !isFavourite, EProfileTab.Joined)
+            }
+          />
+        );
+      case EProfileTab.Favorites:
+        return (
+          <EventList
+            eventList={favoriteList}
+            onFavoritePress={(planID) => markUnFavoritePlan(planID)}
+            isLoading={isFavoriteLoading}
+          />
+        );
+    }
+  };
+
+  const mappedInterests = useMemo(() => {
+    if (!userInfo?.interests || userInfo?.interests?.length === 0) return [];
+
+    return userInfo?.interests
+      .map(({ interest_name }) => {
+        const interest = INTERESTS.find(({ label }) => label === interest_name);
+        return interest ? interest : { emoji: "❓", label: interest_name };
+      })
+      .filter(Boolean);
+  }, [userInfo.interests]);
+
+  return (
+    <>
+      <View style={style.container}>
+        <Header
+          viewstyle={style.headerstyle}
+          leftIcon={true}
+          leftView={{
+            onPress: goBack,
+            icon: ICONS.left_arrow,
+          }}
+          rightIcon={true}
+          rightView={{
+            onPress: () => (userID ? "" : navigation.navigate(NAMES.settings)),
+            icon: userID ? ICONS.more : ICONS.setting,
+            // icon: ICONS.more,
+            iconStyle: style.iconStyle,
+          }}
+        />
+        {isLoading ? (
+          <ActivityIndicator style={style.activityLoader} />
+        ) : (
+          <ScrollView>
+            <View style={style.profileSection}>
+              <FastImage
+                source={{
+                  uri:
+                    organizarProfile?.profilePhotoUrls?.[0] ??
+                    userInfo?.profilePhotoUrls?.[0] ??
+                    dummyImage,
+                }}
+                style={style.profileImage}
+              />
+              <Text style={style.name}>
+                {organizarProfile?.firstName ?? userInfo?.firstName}
+              </Text>
+              <Text style={style.handle}>
+                {organizarProfile?.username ?? userInfo?.username}
+              </Text>
+              {organizarProfile?.userBio ||
+                (userInfo.userBio && (
+                  <Text style={style.bio}>
+                    {organizarProfile?.userBio ?? userInfo.userBio ?? ""}
+                  </Text>
+                ))}
+              {!userID ? (
+                <Button
+                  title={"Edit profile"}
+                  viewstyle={style.bottomView}
+                  textStyle={style.btnText}
+                  onPress={() => navigation.navigate(NAMES.editprofile)}
+                />
+              ) : (
+                <Button
+                  title={"Message"}
+                  viewstyle={style.bottomView}
+                  textStyle={style.btnText}
+                  onPress={() => navigation.navigate(NAMES.chatList)}
+                />
+              )}
+              {mappedInterests.length > 0 && (
+                <View style={style.passionsContainer}>
+                  <Text style={style.passionsTitle}>Passions</Text>
+                  <View style={style.passionsGrid}>
+                    {mappedInterests.map((interest, index) => (
+                      <PassionTag
+                        key={"passions_" + index}
+                        emoji={interest.emoji}
+                        text={interest.label}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
+            </View>
+            <View style={style.tabsContainer}>
+              {tab.map((tab, index) => (
+                <TabButton
+                  key={"tab_" + index}
+                  title={tab}
+                  isActive={selectedTab === tab}
+                  onPress={(title) => setSelectedTab(title)}
+                />
+              ))}
+            </View>
+            {renderTabDetails()}
+          </ScrollView>
+        )}
+      </View>
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import { PayloadAction } from "@reduxjs/toolkit";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { call, fork, put, select, take, takeLatest } from "redux-saga/effects";
 import {
   communityRequest,
@@ -16,28 +16,36 @@ import {
   onAddComment,
   onCreateRequest,
   onDeletePlan,
+  onGetOrganizerProfile,
   onMarkAsFavorite,
+  onSaveProfile,
   onSearchPlan,
+  onSearchPlanBasedOnSuggetion,
   onSetPreferenceAll,
   onSetPreferenceBasedOnGroupId,
   onUpdatePlan,
+  onUpdateprofile,
   saveAllPreferences,
   saveCommunity,
   saveImagges,
   saveInterest,
   selectUser,
+  selectUserData,
   setAcceptedRequest,
   setAddComment,
   setCommentList,
   setCreatedRequest,
   setMarkAsFavorite,
   setNotifications,
+  setOrganizerDetails,
   setPlanDetails,
   setRequestData,
   setSearchPlanData,
+  setSearchPlanDataOnSuggetion,
   setUserdata,
   updateBirthdate,
   updateBirthdaterequest,
+  updateProfileImage,
   uploadImagerequest,
   UsersState,
 } from "../slices/userSlice";
@@ -59,6 +67,8 @@ import {
   savePlanImage,
   setPlanImages,
 } from "../slices/planSlice";
+import reduxStorage from "@/store/reduxStorage";
+import { selectToken } from "../slices/authSlice";
 interface ApiResponse {
   [key: string]: any;
 }
@@ -88,11 +98,15 @@ function* watchRequest(action: any) {
         Authorization: `Bearer ${payload.data}`, // Add the token to the Authorization header
       },
     });
-    console.log(response);
+    console.log(JSON.stringify(response.response.data.user));
 
     if (response.status === 200) {
       yield put(
-        setUserdata(normalizeUserDetails(response.response.data.userDetails))
+        setUserdata(
+          normalizeUserDetails(
+            response.response.data.userDetails ?? response.response.data.user
+          )
+        )
       );
       if (response.response.data.screen === "DOB") {
         replace(NAMES.onboardingThree);
@@ -236,6 +250,8 @@ function* watchGetAllPlansBasedOnPreferences(action: any) {
 }
 
 function* watchJoinRequest(action: any) {
+  console.log("watchJoinRequest", action);
+
   const { payload } = action;
   try {
     const response: ApiResponse = yield call(baseApi.get, payload.url, {
@@ -334,7 +350,28 @@ function* watchAddComment(action: any) {
   }
 }
 
-function* watchSearchPlan(action: any) {
+// const searchPlanRequest = async (
+function* watchSearchPlan(action: any): Generator<any, void, any> {
+  const { payload } = action;
+  try {
+    const response: any = yield call(axios.get, payload.url, {
+      headers: {
+        Authorization: `Bearer ${payload.userToken}`,
+      },
+    });
+
+    if (response.status === 200) {
+      yield put(setSearchPlanData(response.data));
+    } else {
+      yield put(setSearchPlanData({}));
+    }
+  } catch (error) {
+    console.error("Error search plan request:", error);
+    yield put(setSearchPlanData({}));
+  }
+}
+
+function* watchSearchPlanBasedOnSuggetion(action: any) {
   const { payload } = action;
   try {
     const response: ApiResponse = yield call(baseApi.get, payload.url, {
@@ -343,11 +380,11 @@ function* watchSearchPlan(action: any) {
       },
     });
     if (response.status == 200) {
-      yield put(setSearchPlanData(response.response.data));
+      yield put(setSearchPlanDataOnSuggetion(response.response.data));
     }
   } catch (error) {
     console.error("Error join request:", error);
-    yield put(setSearchPlanData({}));
+    yield put(setSearchPlanDataOnSuggetion({}));
   }
 }
 
@@ -412,6 +449,7 @@ function* watchOnToCreateRequest(action: any) {
     if (response) {
       yield put(setCreatedRequest(response?.response?.data));
     }
+    showToast(response);
   } catch (error) {
     console.error("Error join request:", error);
     yield put(setCreatedRequest({}));
@@ -435,6 +473,7 @@ function* watchToCreatePlan(action: any) {
     );
     if (response) {
       yield put(savePlanDetails(response?.response?.data));
+      reduxStorage.removeItem("planImage");
     }
   } catch (error) {
     console.error("Error join request:", error);
@@ -458,6 +497,7 @@ function* watchPlanUpdate(action: any) {
     );
     if (response) {
       yield put(savePlanDetails(response?.response?.data));
+      reduxStorage.removeItem("planImage");
       navigate(NAMES.join, {
         planId: response?.response?.data?.id,
       });
@@ -577,6 +617,79 @@ function* watchSetPreferencesBasedPlanGroup(action: any) {
   }
 }
 
+function* watchOrganizerProfile(action: any) {
+  const { payload } = action;
+  try {
+    const response: ApiResponse = yield call(baseApi.get, payload.url, {
+      headers: {
+        Authorization: `Bearer ${payload.userToken}`,
+      },
+    });
+    if (response) {
+      yield put(setOrganizerDetails(response));
+    }
+  } catch (error) {
+    console.error("Error watchOrganizerProfile:", error);
+    yield put(setOrganizerDetails({}));
+  }
+}
+
+function* watchUpdateProfiledata(action: any) {
+  const { payload } = action;
+  const userToken: string = yield select(selectToken);
+  const userData: UsersState = yield select(selectUserData);
+  console.log(payload);
+  let bodyData = payload.data;
+
+  try {
+    if (payload.data && payload.data.assets) {
+      yield put(updateProfileImage(true));
+      const formData = new FormData();
+      formData.append("profilePhotos", {
+        uri: payload.data.assets[0].uri,
+        name: payload.data.assets[0].fileName,
+        type: payload.data.assets[0].type,
+      });
+      bodyData = formData;
+    }
+    const response: ApiResponse = yield call(
+      baseApi.put,
+      payload.url,
+      bodyData,
+      {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": payload.data.assets
+            ? "multipart/form-data"
+            : "application/json",
+        },
+      }
+    );
+    if (response.status === 200) {
+      showToast(response);
+      console.log(response);
+      yield put(updateProfileImage(false));
+      if (response.response.data) {
+        yield put(
+          setUserdata(
+            normalizeUserDetails({ ...userData, ...response.response.data })
+          )
+        );
+      }
+      yield put(onSaveProfile(false));
+      setTimeout(() => {
+        if (payload.isFrom == "editProfile") {
+          goBack();
+        }
+      }, 1000);
+    }
+  } catch (error) {
+    console.error("Error join request:", error);
+    showToast(error);
+    yield put(onSaveProfile(false));
+  }
+}
+
 export default function* user() {
   yield fork(getUserSaga);
   yield takeLatest(getUserData.type, watchRequest);
@@ -600,8 +713,14 @@ export default function* user() {
   yield takeLatest(onUpdatePlan, watchPlanUpdate);
   yield takeLatest(onDeletePlan, watchPlanDelete);
   yield takeLatest(onSetPreferenceAll, watchSetPreferencesGroupMember);
+  yield takeLatest(onGetOrganizerProfile, watchOrganizerProfile);
   yield takeLatest(
     onSetPreferenceBasedOnGroupId,
     watchSetPreferencesBasedPlanGroup
+  );
+  yield takeLatest(onUpdateprofile, watchUpdateProfiledata);
+  yield takeLatest(
+    onSearchPlanBasedOnSuggetion,
+    watchSearchPlanBasedOnSuggetion
   );
 }

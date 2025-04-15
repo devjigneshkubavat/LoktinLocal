@@ -7,25 +7,42 @@ import moment from "moment";
 import Button from "@/components/Button";
 import { STRINGS } from "@/constants/strings";
 import ConfirmAlert from "@/components/ConfirmAlert";
+import { onLeaveGroup } from "@/redux/slices/planSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 interface EventDetailsProps {
   event?: getAllPreferences;
-  isCurrentUserFound?: boolean,
-  isCurrentUserJoined?: boolean
+  isCurrentUserFound?: boolean;
+  isCurrentUserJoined?: boolean;
 }
 
-export const EventDetails = ({ event, isCurrentUserFound, isCurrentUserJoined }: EventDetailsProps) => {
+export const EventDetails = ({
+  event,
+  isCurrentUserFound,
+  isCurrentUserJoined,
+}: EventDetailsProps) => {
   const { theme } = useTheme();
   const style = useMemo(() => styles(theme), [theme]);
   const [isModalVisible, setModalVisible] = useState(false);
+  const dispatch = useDispatch();
+  const { userToken } = useSelector((state: RootState) => state.auth);
 
   const handleYesPress = () => {
-    console.log('handleYesPressd');
+    dispatch(
+      onLeaveGroup({
+        url: "/plans/group/leave",
+        data: {
+          planId: event?.planId,
+        },
+        userToken,
+      })
+    );
     setModalVisible(false);
   };
 
   const handleNoPress = () => {
-    console.log('handleNoPress');
+    console.log("handleNoPress");
     setModalVisible(false);
   };
 
@@ -47,15 +64,16 @@ export const EventDetails = ({ event, isCurrentUserFound, isCurrentUserJoined }:
           ).format("dddd, MMMM Do, h:mm A")} */}
         </Text>
       </View>
-      { !isCurrentUserFound && isCurrentUserJoined ?
+      {!isCurrentUserFound && isCurrentUserJoined ? (
         <Button
           title={STRINGS.leave}
           viewstyle={style.bottomView}
           textStyle={style.btnText}
           onPress={() => setModalVisible(true)}
         />
-        : ''
-      }
+      ) : (
+        ""
+      )}
       <ConfirmAlert
         visible={isModalVisible}
         title="Are you sure you want to leave this plan?"
@@ -65,18 +83,20 @@ export const EventDetails = ({ event, isCurrentUserFound, isCurrentUserJoined }:
         secondbuttontext="No"
         Secondbutton={true}
       />
-       { event?.tags ? 
-          <View style={style.tagsContainer}>
-            <Text style={style.tagTitle}>{"Tags"}</Text>
-            <View style={style.tags}>
-              {event?.tags?.map((tag, index) => (
-                <View key={index} style={style.tag}>
-                  <Text style={style.tagText}>{tag}</Text>
-                </View>
-              ))}
-            </View>
+      {event?.tags ? (
+        <View style={style.tagsContainer}>
+          <Text style={style.tagTitle}>{"Tags"}</Text>
+          <View style={style.tags}>
+            {event?.tags?.map((tag, index) => (
+              <View key={index} style={style.tag}>
+                <Text style={style.tagText}>{tag}</Text>
+              </View>
+            ))}
           </View>
-        : ''}
+        </View>
+      ) : (
+        ""
+      )}
     </View>
   );
 };

@@ -14,7 +14,10 @@ import { styles } from "./styles";
 import Icon from "@/components/Icon";
 import { ICONS } from "@/constants";
 import InspirationGrid from "./component/InspirationGrid";
-import { handleChooseImageFromGallery } from "@/utils/helper";
+import {
+  handleCapturePhotoFromCamera,
+  handleChooseImageFromGallery,
+} from "@/utils/helper";
 import {
   onGetPlanImages,
   onUploadPlanImage,
@@ -26,6 +29,8 @@ import { PickImageProps, PlanImagesListProps } from "@/constants/types";
 import FastImage from "react-native-fast-image";
 import store, { RootState } from "@/store/store";
 import Toast from "react-native-toast-message";
+import reduxStorage from "@/store/reduxStorage";
+import Imagemodal from "@/screens/App/Create/component/Uploadimagemodal/imahemodal";
 
 type TProps = {
   handleContinue: () => void;
@@ -52,6 +57,8 @@ const StepTwo = (prop: TProps) => {
     setScrollPosition(contentOffsetY);
   };
 
+  const [isVisiblePicker, setIsVisiblePicker] = useState(false);
+
   const postImages = [
     { id: "1", uri: "https://randomuser.me/api/portraits/men/1.jpg" },
     { id: "2", uri: "https://randomuser.me/api/portraits/men/2.jpg" },
@@ -64,19 +71,30 @@ const StepTwo = (prop: TProps) => {
   ];
 
   const pickImage = async () => {
-    const image: Asset | undefined = await handleChooseImageFromGallery();
-    if (image?.uri) {
+    const image: any = await handleChooseImageFromGallery();
+    if (!!image?.sourceURL) {
       const selectedImage: PickImageProps = {
-        uri: image?.uri,
-        name: image?.fileName,
-        type: image?.type,
+        uri: image?.sourceURL,
+        name: image?.filename,
+        type: image?.mime,
       };
-      dispatch(
-        onUploadPlanImage({
-          url: "photos/upload-photos",
-          data: selectedImage,
-        })
-      );
+      setIsVisiblePicker(false);
+      onSelectedImage(selectedImage?.uri ?? "");
+      reduxStorage.setItem("planImage", selectedImage);
+    }
+  };
+
+  const openCamera = async () => {
+    const image: any = await handleCapturePhotoFromCamera();
+    if (!!image?.sourceURL) {
+      const selectedImage: PickImageProps = {
+        uri: image?.sourceURL,
+        name: image?.filename,
+        type: image?.mime,
+      };
+      setIsVisiblePicker(false);
+      onSelectedImage(selectedImage?.uri ?? "");
+      reduxStorage.setItem("planImage", selectedImage);
     }
   };
 
@@ -147,7 +165,10 @@ const StepTwo = (prop: TProps) => {
         <Text style={style.sectionTitle}>
           Upload an image that fits your plan
         </Text>
-        <TouchableOpacity style={style.uploadBox} onPress={pickImage}>
+        <TouchableOpacity
+          style={style.uploadBox}
+          onPress={() => setIsVisiblePicker(true)}
+        >
           {selectedImage?.uri ? (
             <FastImage
               source={
@@ -173,7 +194,14 @@ const StepTwo = (prop: TProps) => {
             </View>
           </View>
         ) : (
-          <InspirationGrid onImageSelect={(url) => onSelectedImage(url)} />
+          <InspirationGrid
+            images={planImagesList?.map((item, index) => ({
+              id: item.id ?? index + 1,
+              imageUrl: item.src.original,
+            }))}
+            onImageSelect={(url) => onSelectedImage(url)}
+          />
+          // <InspirationGrid onImageSelect={(url) => onSelectedImage(url)} />
         )}
       </ScrollView>
       <View style={style.footerContainer}>
@@ -188,6 +216,14 @@ const StepTwo = (prop: TProps) => {
           />
         </TouchableOpacity>
       </View>
+      <Imagemodal
+        visible={isVisiblePicker}
+        onrequestClose={() => setIsVisiblePicker(false)}
+        opencamera={openCamera}
+        opengallery={pickImage}
+        onclose={() => setIsVisiblePicker(false)}
+        ontouchable={() => setIsVisiblePicker(false)}
+      />
     </View>
   );
 };

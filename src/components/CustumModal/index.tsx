@@ -6,6 +6,11 @@ import { ICONS } from '@/constants';
 import Icon from '../Icon';
 import { useTheme } from '@/hooks/useTheme';
 import { useMemo } from 'react';
+import Popover from 'react-native-popover-view';
+import InfoBtn from '../InfoBtn';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from 'App';
+
 
 const CustumModal: React.FC<ModalProps> = ({
     isVisible,
@@ -46,9 +51,12 @@ const CustumModal: React.FC<ModalProps> = ({
                             <TouchableOpacity
                                 activeOpacity={1}
                                 style={styless.option}
-                                onPress={() => onSelect(item)}>
-                                <Text style={styless.optionText}>{item}</Text>
-                                {selectedValue == item && <Icon icon={ICONS.checksIcon} iconStyle={styless.iconSize} />}
+                                onPress={() => onSelect(item.id)}>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Text style={styless.optionText}>{item.label}</Text>
+                                    {item.tooltip && <InfoBtn title='Keys are people who have connected in groups with you before or you are currently in a group with.' onPress={() => { }} />}
+                                </View>
+                                {selectedValue == item.id && <Icon icon={ICONS.checksIcon} iconStyle={styless.iconSize} />}
                             </TouchableOpacity>
                         )}
                     />
@@ -61,6 +69,8 @@ const CustumModal: React.FC<ModalProps> = ({
                     }}
                 />
             </SafeAreaView>
+            <Toast config={toastConfig} />
+
         </Modal>
     );
 };

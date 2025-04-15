@@ -15,6 +15,7 @@ import {
 import { showToast } from "@/utils/helper";
 import { ICONS } from "@/constants";
 import Toast from "react-native-toast-message";
+import { goBack } from "@/navigation/rootNavigation";
 
 interface ApiResponse {
   [key: string]: any;
@@ -34,7 +35,9 @@ function* addPhoneNumber(action: any) {
       }
     );
     console.log("response ::------->", response);
+    showToast({...response,status:200})
     yield put(addPhoneNumberSuccess(response));
+    goBack()
   } catch (error) {
     console.error("Error adding comment:", error);
     showToast(error);
@@ -74,15 +77,16 @@ function* updateSecuritySettings(action: any) {
         },
       }
     );
-    
-    Toast.show({
-          type: "success",
-          text1: response.message ?? response.toString(),
-          position: "top",
-          visibilityTime: 2000,
-          swipeable: false,
-          props: { icon: ICONS.successIcon },
-        });
+    console.log(response);
+    showToast({...response,status:200})
+    // Toast.show({
+    //       type: "success",
+    //       text1: response.message ?? response.toString(),
+    //       position: 'bottom',
+    //       visibilityTime: 2000,
+    //       swipeable: false,
+    //       props: { icon: ICONS.successIcon },
+    //     });
   } catch (error) {
     showToast(error);
   }

@@ -52,7 +52,8 @@ export const styles = ({ colors }: Theme) =>
     mapBoxInput: {
       borderRadius: verticalScale(10),
       height: verticalScale(55),
-      backgroundColor: "white",
+      backgroundColor: colors.white,
+      color: colors.black,
       borderWidth: verticalScale(1),
       borderColor: COLORS.primaryColor,
       width: horizontalScale(335),

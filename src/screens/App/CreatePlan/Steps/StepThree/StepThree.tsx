@@ -22,18 +22,21 @@ import { COLORS } from "@/constants/colors";
 import { navigate, navigation, replace } from "@/navigation/rootNavigation";
 import { NAMES } from "@/navigation/name";
 import { useDispatch, useSelector } from "react-redux";
-import { onUpdatePlan, setPlanDetails } from "@/redux/slices/userSlice";
+import { onUpdatePlan } from "@/redux/slices/userSlice";
 import { RootState } from "@/store/store";
 import FastImage from "react-native-fast-image";
 import {
   onCreatePlan,
+  onUploadPlanImage,
   resetAllDetails,
   savePlanImage,
+  setPlanDetails,
 } from "@/redux/slices/planSlice";
 import { horizontalScale, verticalScale } from "@/utils/metrics";
 import TagInput from "@/components/TagInput";
 import PlanCreated from "@/components/PlanCreated";
 import Loader from "@/components/Loader";
+import reduxStorage from "@/store/reduxStorage";
 
 type TProps = {
   handleContinue: () => void;
@@ -104,7 +107,7 @@ const StepThree = (prop: TProps) => {
   const [requireJoinRequest, setRequireJoinRequest] = useState(true);
   const [groupSize, setGroupSize] = useState(2);
   const [showPicker, setShowPicker] = useState(false);
-  const groupSizes = [2, 4];
+  const groupSizes = [2, 3, 4, 5];
   const [scrollPosition, setScrollPosition] = useState(0);
   const dispatch = useDispatch();
   const { planDetails } = useSelector((state: RootState) => state.user);
@@ -121,7 +124,17 @@ const StepThree = (prop: TProps) => {
     setScrollPosition(contentOffsetY);
   };
 
-  const onInitCreatePlan = () => {
+  const onInitCreatePlan = async () => {
+    const img = await reduxStorage.getItem("planImage");
+    if (!!img) {
+      dispatch(
+        onUploadPlanImage({
+          url: "photos/upload-photos",
+          data: img,
+        })
+      );
+    }
+
     if (isUpdate) {
       // /plans/2
       dispatch(
@@ -132,9 +145,10 @@ const StepThree = (prop: TProps) => {
             description: description,
             allowComments: allowComments,
             groupSize: groupSize,
-            type: "group",
+            type: groupSize === 2 ? "pair" : "group",
             allowJoinRequests: requireJoinRequest,
             tags: tags,
+            ...(img && { imageUrl: img }),
           },
           userToken,
         })
@@ -148,9 +162,10 @@ const StepThree = (prop: TProps) => {
             description: description,
             allowComments: allowComments,
             groupSize: groupSize,
-            type: "group",
+            type: groupSize === 2 ? "pair" : "group",
             allowJoinRequests: requireJoinRequest,
             tags: tags,
+            ...(img && { imageUrl: img }),
           },
           userToken,
         })
@@ -213,7 +228,7 @@ const StepThree = (prop: TProps) => {
             placeholder="Add tags..."
             // maxTags={5}
             tagColor="#4a8cff"
-            textColor="#fff"
+            textColor={COLORS.white}
             delimiters={[",", " "]}
           />
         </View>
@@ -222,16 +237,26 @@ const StepThree = (prop: TProps) => {
           <Text style={style.tagsButtonText}>Add tags</Text>
         </TouchableOpacity> */}
 
-        {/* <TouchableOpacity
+        <TouchableOpacity
           style={style.settingItem}
-          onPress={() => navigation.navigate(NAMES.preferences)}
+          onPress={() => {
+            dispatch(
+              setPlanDetails({
+                ...planData,
+                groupSize,
+              })
+            );
+            setTimeout(() => {
+              navigation.navigate(NAMES.preferences);
+            }, 200);
+          }}
         >
           <View style={style.settingLeft}>
             <Icon icon={ICONS.Grid} iconStyle={style.blackIconSize} />
             <Text style={style.settingText}>Set square preferences</Text>
           </View>
           <Icon icon={ICONS.rightArrow} iconStyle={style.blackIconSize} />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={style.settingItem}
@@ -307,6 +332,7 @@ const StepThree = (prop: TProps) => {
       </ScrollView>
       <PlanCreated
         visible={planCreatedVisible}
+        title={planData?.name}
         onClose={() => setPlanCreatedVisible(false)}
       />
       <View style={style.footer}>

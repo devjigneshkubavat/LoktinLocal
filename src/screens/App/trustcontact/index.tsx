@@ -1,6 +1,6 @@
 import { useTheme } from "@/hooks/useTheme";
 import React, { useEffect, useMemo, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import style from "./styles";
 import Header from "@/components/Header";
 import CustomTextInput from "@/components/TextInput";
@@ -11,6 +11,10 @@ import Toast from "react-native-toast-message";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { addPhoneNumberRequest } from "@/redux/slices/updateSecuritiesSlice";
+import MastInput from "@/components/MastInput";
+import { STRINGS } from "@/constants/strings";
+import { isPhoneNumberValid, removeWhiteSpace } from "@/utils/helper";
+import Button from "@/components/Button";
 
 const TrustContact = () => {
   const { theme } = useTheme();
@@ -25,17 +29,17 @@ const TrustContact = () => {
   );
 
   const onAddPhonePress = () => {
-    if (Number === "" || Number.length < 6) {
-      Toast.show({
-        type: "error",
-        text1: "Invalid phone number",
-        text2: "Please enter valid phone number",
-        visibilityTime: 3000,
-      });
-      return;
-    }
+    // if (Number === "" || Number.length < 6) {
+    //   Toast.show({
+    //     type: "error",
+    //     text1: "Invalid phone number",
+    //     text2: "Please enter valid phone number",
+    //     visibilityTime: 3000,
+    //   });
+    //   return;
+    // }
     const data = {
-      phoneNumber: Number,
+      phoneNumber: removeWhiteSpace(Number),
     };
     dispatch(
       addPhoneNumberRequest({
@@ -64,11 +68,18 @@ const TrustContact = () => {
           icon: ICONS.left_arrow,
         }}
       />
-      <View style={styless.container}>
-        <Text style={styless.text}>Phone</Text>
-      </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          style={styless.maincontainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined} // Adjust for iOS
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0} // Offset for header
+        >
+          <View style={styless.container}>
+            <Text style={styless.text}>Phone</Text>
+          </View>
+       
       <View style={styless.flexview}>
-        <CustomTextInput
+        {/* <CustomTextInput
           style={styless.textinput}
           placeholder={`Enter a trusted contact's number`}
           label={"Phone"}
@@ -76,11 +87,26 @@ const TrustContact = () => {
           onChangeText={(v) => Setnumber(v)}
           keyboardType="numeric"
           maxLength={15}
+        /> */}
+        <MastInput
+          label={STRINGS.phone}
+          style={styless.textinput}
+          placeholder={`Enter a trusted contact's number`}
+          value={Number}
+          onChangeText={(v) => Setnumber(v)}
+          keyboardType='number-pad'
+          mask={"+1 [000] [000] [00][00]"}
         />
-        <TouchableOpacity style={styless.touch} onPress={onAddPhonePress}>
-          <Text style={styless.touchtext}>Complete</Text>
-        </TouchableOpacity>
+        <Button
+          title={'Complete'}
+          viewstyle={styless.touch}
+          textStyle={styless.touchtext}
+          onPress={() => { onAddPhonePress() }}
+          disabled={!isPhoneNumberValid(Number)}
+        />
       </View>
+      </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </>
   );
 };

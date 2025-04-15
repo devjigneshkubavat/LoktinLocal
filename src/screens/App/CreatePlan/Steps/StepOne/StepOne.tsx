@@ -28,7 +28,7 @@ const StepOne = (prop: TProps) => {
   const { theme } = useTheme();
   const style = useMemo(() => styles(theme), [theme]);
   const dispatch = useDispatch();
-  const { planDetails } = useSelector((state: RootState) => state.user);
+  const { planDetails, userLocation } = useSelector((state: RootState) => state.user);
   const { planData } = useSelector((state: RootState) => state.plan);
   const [isPickerVisible, setPickerVisible] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
@@ -92,6 +92,10 @@ const StepOne = (prop: TProps) => {
           countryId="US"
           inputStyle={style.mapBoxInput}
           containerStyle={style.addressContainer}
+          proximity={{
+            longitude: userLocation.longitude,
+            latitude: userLocation.latitude,
+          }}
         />
         <TouchableOpacity
           onPress={() => setPickerVisible(true)}

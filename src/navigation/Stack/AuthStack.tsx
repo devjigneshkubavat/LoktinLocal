@@ -55,6 +55,8 @@ console.log(screen);
         <Stack.Screen component={SCREENS.OnboardingFive} name={NAMES.onboardingFive} />
         <Stack.Screen component={SCREENS.OnboardingSix} name={NAMES.onboardingSix} />
         <Stack.Screen component={SCREENS.SignIn} name={NAMES.signin} />
+        <Stack.Screen component={SCREENS.TrustContact} name={NAMES.trustcontact} />
+
       </Stack.Group>
     </Stack.Navigator>
   )

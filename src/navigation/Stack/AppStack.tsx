@@ -17,6 +17,7 @@ const AppStack = () => {
             <Stack.Group>
                 <Stack.Screen component={BottomTab} name={'Tab'} />
                 <Stack.Screen component={SCREENS.Join} name={NAMES.join} />
+		        <Stack.Screen component={SCREENS.Profile} name={NAMES.userProfile} />
                 <Stack.Screen
                     component={SCREENS.CreatePlan}
                     name={NAMES.createPlan}
@@ -29,11 +30,12 @@ const AppStack = () => {
                 <Stack.Screen
                     component={SCREENS.Settings}
                     name={NAMES.settings}
-                    options={{ animation: 'none'}}
+                    options={{ animation: 'none' }}
                 />
                 <Stack.Screen
                     component={SCREENS.EditDetails}
                     name={NAMES.editDetails}
+                    options={{ animation:'slide_from_bottom' }}
                 />
                 <Stack.Screen
                     component={SCREENS.Notification}
@@ -82,6 +84,9 @@ const AppStack = () => {
                     component={SCREENS.CreatePost}
                     name={NAMES.createPost}
                 />
+                <Stack.Screen component={SCREENS.OnboardingFour} name={NAMES.onboardingFour1} />
+                <Stack.Screen component={SCREENS.OnboardingFive} name={NAMES.onboardingFive1} />
+
             </Stack.Group>
         </Stack.Navigator>
     )

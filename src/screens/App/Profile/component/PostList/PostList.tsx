@@ -14,7 +14,7 @@ import {
 } from "@/redux/slices/postSlice";
 import { useIsFocused } from "@react-navigation/native";
 
-const PostList = ({ onPressPlusIcon }) => {
+const PostList = ({ onPressPlusIcon, userId }) => {
   const { theme } = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const isFocused = useIsFocused();
@@ -24,12 +24,10 @@ const PostList = ({ onPressPlusIcon }) => {
   const { userToken } = useSelector((state: RootState) => state.auth);
   const { postsList } = useSelector((state: RootState) => state.post);
 
-  console.log("postsList", postsList);
-
   useEffect(() => {
     dispatch(
       getPostsListRequest({
-        url: "api/getPost",
+        url: `api/getPost/${userId}`,
         userToken,
       })
     );
@@ -42,18 +40,18 @@ const PostList = ({ onPressPlusIcon }) => {
 
   return (
     <View style={style.boxContainer}>
-      {postsList?.map((item) => (
+      {postsList?.map((item, index) => (
         <FastImage
+        key={`post$_${index}`}
           source={{ uri: renderSource(item) }}
           style={style.boxImage}
         />
       ))}
-      {/* {userInfo.profilePhotoUrls?.map((item) => (
-        <FastImage source={{ uri: item }} style={style.boxImage} />
-      ))} */}
-      <TouchableOpacity style={style.boxImage} onPress={onPressPlusIcon}>
-        <Image source={ICONS.plus} style={style.plusIcon} />
-      </TouchableOpacity>
+      { userId === userInfo.userId && (
+        <TouchableOpacity style={style.boxImage} onPress={onPressPlusIcon}>
+          <Image source={ICONS.plus} style={style.plusIcon} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

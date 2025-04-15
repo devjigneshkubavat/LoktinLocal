@@ -14,6 +14,10 @@ export const style = ({colors} : Theme) => StyleSheet.create({
         borderBlockColor:colors.headerBorder,
         paddingBottom:verticalScale(20)
     },
+    maincontainer: {
+        backgroundColor: colors.white,
+        flex: 1
+    },
     container:{
         borderBottomWidth:moderateScale(3),
         borderColor:COLORS.primaryColor,

@@ -101,7 +101,7 @@ export const style = ({ colors }: Theme) => StyleSheet.create({
     labeltxt: {
         fontSize: moderateScale(17),
         fontFamily: FONTS.Lexend_Light,
-        color: colors.black
+        color: colors.black,
     },
     selectview: {
         flexGrow: 1,

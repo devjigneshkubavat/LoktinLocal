@@ -27,6 +27,16 @@ export interface UsersState {
   searchPlanList: getAllPreferences[];
   notificationList: any[];
   createdRequestList: RequestProps[];
+  organizarProfile: UserData | undefined;
+  updateProfileLoader: Boolean;
+  updateImageLoader: Boolean;
+  nextCursor: null | number;
+  userLocation: {
+    latitude: number;
+    longitude: number;
+  };
+  isFavoriteLoading: boolean;
+  suggetionList: { word: string; score: number }[];
 }
 const usersInitialState: UsersState = {
   userInfo: {},
@@ -43,6 +53,16 @@ const usersInitialState: UsersState = {
   searchPlanList: [],
   notificationList: [],
   createdRequestList: [],
+  organizarProfile: undefined,
+  updateProfileLoader: false,
+  updateImageLoader: false,
+  nextCursor: null,
+  userLocation: {
+    latitude: 0,
+    longitude: 0,
+  },
+  isFavoriteLoading: false,
+  suggetionList: [],
 };
 
 export const usersSlice = createSlice({
@@ -99,8 +119,10 @@ export const usersSlice = createSlice({
       state.isLoading = true;
     },
     saveAllPreferences: (state, action) => {
+      console.log("🚀 ~ action:", action);
       state.isLoading = false;
       state.preferencesListData = action.payload.plans;
+      state.nextCursor = action.payload.nextCursor;
     },
     initiateJoinRequest: (state, action) => {
       state.isLoading = true;
@@ -144,6 +166,13 @@ export const usersSlice = createSlice({
     },
     setSearchPlanData: (state, action) => {
       state.isLoading = false;
+      state.suggetionList = action.payload;
+    },
+    onSearchPlanBasedOnSuggetion: (state, action) => {
+      state.isLoading = true;
+    },
+    setSearchPlanDataOnSuggetion: (state, action) => {
+      state.isLoading = false;
       state.searchPlanList = action.payload;
     },
     getNotifications: (state, action) => {
@@ -154,13 +183,16 @@ export const usersSlice = createSlice({
       state.notificationList = action.payload;
     },
     onMarkAsFavorite: (state, action) => {
-      state.isLoading = true;
+      state.isFavoriteLoading = true;
     },
     setMarkAsFavorite: (state, action) => {
-      state.isLoading = false;
+      state.isFavoriteLoading = false;
       state.preferencesListData = state?.preferencesListData?.map((item) => {
-        if (item?.id === action?.payload?.response?.planId) {
-          return { ...item, isFavorite: action?.payload?.payload?.isFavorite };
+        if (item?.id === action?.payload?.payload?.planId) {
+          return {
+            ...item,
+            isFavourite: action?.payload?.payload?.isFavourite,
+          };
         }
         return { ...item };
       });
@@ -186,6 +218,38 @@ export const usersSlice = createSlice({
     },
     onSetPreferenceBasedOnGroupId: (state, action) => {
       state.isLoading = true;
+    },
+    setGender: (state, action) => {
+      state.userInfo.gender = action.payload;
+    },
+    onUpdateprofile: (state, action) => {
+      state.updateProfileLoader = true;
+    },
+    onGetOrganizerProfile: (state, action) => {
+      state.isLoading = true;
+    },
+    setOrganizerDetails: (state, action) => {
+      state.isLoading = false;
+      state.organizarProfile = action.payload?.response?.data;
+    },
+    onSaveProfile: (state, action) => {
+      state.updateProfileLoader = false;
+    },
+    resetProfileData: (state, action) => {
+      state.organizarProfile = undefined;
+    },
+    updateProfileImage: (state, action) => {
+      state.updateImageLoader = action.payload;
+    },
+    setUserLocation: (state, action) => {
+      state.userLocation = action.payload;
+    },
+    resetSearchList: (state) => {
+      state.suggetionList = [];
+    },
+    clearSearchedList: (state) => {
+      state.searchPlanList = [];
+      state.suggetionList = [];
     },
   },
 });
@@ -228,6 +292,18 @@ export const {
   onDeletePlan,
   onSetPreferenceAll,
   onSetPreferenceBasedOnGroupId,
+  setGender,
+  onGetOrganizerProfile,
+  setOrganizerDetails,
+  resetProfileData,
+  onUpdateprofile,
+  onSaveProfile,
+  updateProfileImage,
+  setUserLocation,
+  onSearchPlanBasedOnSuggetion,
+  setSearchPlanDataOnSuggetion,
+  resetSearchList,
+  clearSearchedList,
 } = usersSlice.actions;
 export default usersSlice.reducer;
 export const selectUser = (state: RootState) => state.user;

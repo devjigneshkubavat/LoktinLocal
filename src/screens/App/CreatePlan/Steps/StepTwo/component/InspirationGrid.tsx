@@ -1,92 +1,66 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useMemo } from "react";
-import { ResponsiveGrid } from "react-native-flexible-grid";
+import { ScrollView, Text, View, TouchableOpacity } from "react-native";
+import FastImage from "react-native-fast-image";
 import { useTheme } from "@/hooks/useTheme";
 import { styles } from "./styles";
 
-interface DataProp {
-  id: number;
-  widthRatio?: number;
-  heightRatio?: number;
-  imageUrl: string;
+interface PlanImagesListProps {
+  id: number | string;
+  src: {
+    original: string;
+  };
 }
 
-const InspirationGrid = ({
-  onImageSelect,
-}: {
+interface Props {
+  images: PlanImagesListProps[];
   onImageSelect: (url: string) => void;
-}) => {
-  let idCounter = React.useRef(0);
+}
+
+const InspirationGrid = ({ images, onImageSelect }: Props) => {
   const { theme } = useTheme();
   const style = useMemo(() => styles(theme), [theme]);
 
-  const getData = () => {
-    const originalData = [
-      {
-        imageUrl: "https://picsum.photos/200/300?random=1",
-        widthRatio: 1,
-        heightRatio: 4,
-      },
-      {
-        imageUrl: "https://picsum.photos/200/300?random=2",
-        widthRatio: 1,
-        heightRatio: 3,
-      },
-      {
-        imageUrl: "https://picsum.photos/200/300?random=3",
-        widthRatio: 1,
-        heightRatio: 4,
-      },
-      {
-        imageUrl: "https://picsum.photos/200/300?random=4",
-        widthRatio: 1,
-        heightRatio: 5,
-      },
-      {
-        imageUrl: "https://picsum.photos/200/300?random=5",
-        widthRatio: 1,
-        heightRatio: 5,
-      },
-      {
-        imageUrl: "https://picsum.photos/200/300?random=6",
-        widthRatio: 1,
-        heightRatio: 3,
-      },
-    ];
+  // Add heights & imageUrl
+  const processedData = useMemo(() => {
+    return images.map((item, index) => ({
+      ...item,
+      id: item.id ?? index,
+      imageUrl: item?.imageUrl,
+      height: 180 + (index % 5) * 30, // Dynamic height variation
+    }));
+  }, [images]);
 
-    return originalData.map((item) => ({ ...item, id: ++idCounter.current }));
-  };
-
-  const renderItem = ({ item }: { item: DataProp }) => {
-    return (
-      <TouchableOpacity
-        style={style.boxContainer}
-        onPress={() => onImageSelect(item.imageUrl)}
-      >
-        <Image
-          source={{ uri: item.imageUrl }}
-          style={style.box}
-          resizeMode="cover"
-        />
-      </TouchableOpacity>
-    );
-  };
+  // Split into 3 columns
+  const columns: typeof processedData[] = [[], [], []];
+  processedData.forEach((item, index) => {
+    const columnIndex = index % 3;
+    columns[columnIndex].push(item);
+  });
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScrollView contentContainerStyle={style.container}>
       <Text style={style.title}>Get inspired</Text>
-      <Text style={style.subtitle}>
-        Choose an image that best fits your plan
-      </Text>
-      <ResponsiveGrid
-        maxItemsPerColumn={3}
-        data={getData()}
-        renderItem={renderItem}
-        itemUnitHeight={50}
-        showScrollIndicator={false}
-        keyExtractor={(item: DataProp) => item.id.toString()}
-      />
-    </View>
+      <Text style={style.subtitle}>Choose an image that best fits your plan</Text>
+      <View style={style.grid}>
+        {columns.map((columnItems, colIndex) => (
+          <View key={`column_${colIndex}`} style={style.column}>
+            {columnItems.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={style.imageBox}
+                onPress={() => onImageSelect(item.imageUrl)}
+              >
+                <FastImage
+                  source={{ uri: item.imageUrl }}
+                  style={[style.image, { height: item.height }]}
+                  resizeMode={FastImage.resizeMode.cover}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 };
 

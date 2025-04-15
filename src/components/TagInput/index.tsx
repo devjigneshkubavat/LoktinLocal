@@ -1,5 +1,7 @@
+import { Theme } from '@/context/themeContext';
+import { useTheme } from '@/hooks/useTheme';
 import { horizontalScale, moderateScale, verticalScale } from '@/utils/metrics';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   TextInput,
@@ -34,7 +36,8 @@ interface TagInputProps {
   delimiters?: string[];
 }
 
-const TagInput: React.FC<TagInputProps> = ({
+const 
+TagInput: React.FC<TagInputProps> = ({
   initialTags = [],
   onChangeTags,
   placeholder = 'Add a tag...',
@@ -56,6 +59,8 @@ const TagInput: React.FC<TagInputProps> = ({
 }) => {
   const [tags, setTags] = useState<string[]>(initialTags);
   const [inputValue, setInputValue] = useState('');
+  const { theme } = useTheme();
+  const styles = useMemo(() => stylesFun(theme), [theme]);
 
   useEffect(() => {
     onChangeTags?.(tags);
@@ -155,7 +160,7 @@ const TagInput: React.FC<TagInputProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const stylesFun = ({ colors }: Theme) => StyleSheet.create({
   container: {
     padding: 10,
   },
@@ -188,7 +193,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(0),
     paddingVertical: verticalScale(8),
     fontSize: moderateScale(14),
-    color: '#333',
+    color: colors.black,
   },
 });
 

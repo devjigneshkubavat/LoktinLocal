@@ -66,6 +66,12 @@ const planSlice = createSlice({
       state.isLoading = false;
       state.planImagesList = action.payload;
     },
+    onLeaveGroup: (state, action) => {
+      state.isLoading = true;
+    },
+    setLeaveGroup: (state, action) => {
+      state.isLoading = false;
+    },
   },
 });
 
@@ -78,5 +84,7 @@ export const {
   resetAllDetails,
   onGetPlanImages,
   setPlanImages,
+  onLeaveGroup,
+  setLeaveGroup,
 } = planSlice.actions;
 export default planSlice.reducer;

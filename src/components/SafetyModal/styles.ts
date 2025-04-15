@@ -11,6 +11,18 @@ export const styles = ({ colors }:Theme) => StyleSheet.create({
     },
     modal: {
         backgroundColor: colors.white,
+        flex:1,
+        marginTop:verticalScale(20),
+        borderColor:COLORS.primaryColor,
+        borderWidth:moderateScale(1),
+        borderRadius:moderateScale(10),
+        marginHorizontal:horizontalScale(0.5),
+        marginBottom:verticalScale(0.5),
+        elevation:0.7,
+        shadowColor:'#171717',
+        shadowOffset:{width: 0, height:2},
+        shadowOpacity:0.2,
+        shadowRadius:3,
     },
     option: {
         paddingVertical: verticalScale(8),
@@ -24,7 +36,7 @@ export const styles = ({ colors }:Theme) => StyleSheet.create({
         fontSize: moderateScale(16),
         color: colors.fontblackColor,
         fontFamily:FONTS.Lexend_Light,
-        textTransform:'capitalize',
+        textTransform:'capitalize'
     },
     headerBottom:{
         borderBottomWidth:moderateScale(1),
@@ -32,11 +44,17 @@ export const styles = ({ colors }:Theme) => StyleSheet.create({
         paddingLeft:horizontalScale(10)
     },
     containerStyle:{
-        paddingHorizontal:horizontalScale(16)
+        paddingHorizontal:horizontalScale(9),
     },
     iconSize:{
         height:verticalScale(16),
         tintColor:COLORS.primaryColor
+    },
+    closeBtn:{
+        marginTop:verticalScale(10),
+        alignItems:'flex-start',
+        marginLeft:horizontalScale(9),
+        width:horizontalScale(24)
     }
 });
 

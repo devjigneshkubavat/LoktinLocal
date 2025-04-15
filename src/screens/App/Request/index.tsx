@@ -109,9 +109,11 @@ const Request = () => {
 
   useEffect(() => {
     // !! Need to put user ID Dynamically Right now data is not coming from API so I;ve put as 2.
+
+    // /plans/pending-join-requests/:userId
     dispatch(
       initiateJoinRequest({
-        url: `join-requests/user/${userInfo?.userId}`,
+        url: `plans/pending-join-requests/${userInfo?.userId}`,
         userToken,
       })
     );

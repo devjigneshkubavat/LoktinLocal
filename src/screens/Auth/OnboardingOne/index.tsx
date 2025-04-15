@@ -2,7 +2,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import BoxComponent from '@/hoc/OuterView';
 import Header from '@/components/Header';
-import { GENDER, ICONS } from '@/constants';
+import { GENDER, genderOptions, ICONS } from '@/constants';
 import { STRINGS } from '@/constants/strings';
 import {styles} from './styles';
 import ProgressBar from '@/components/ProgressBar';
@@ -76,7 +76,7 @@ export const OnboardingOne = () => {
           />
           <Dropdown
             label={STRINGS.gender}
-            options={GENDER}
+            options={genderOptions}
             placeholder={STRINGS.select}
             onSelect={value => handleSelect('gender', value)}
           />

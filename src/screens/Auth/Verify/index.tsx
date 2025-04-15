@@ -91,8 +91,9 @@ const Verify = () => {
                 const response = await dispatch(verifyOTP({
                     url: 'auth/verify-user',
                     data: { userId: route?.params?.userData?.userId, otp: otpText }
-                }))
+                }))                
                 if (response.status === 200) {
+                    dispatch(verifySuccess(response.response.data.token))
                     setLocally('screen', '0')
                     dispatch(setUserdata(normalizeUserDetails(response.response.data)))
                     replace(NAMES.onboardingThree)

@@ -12,6 +12,7 @@ const BottomTab = () => {
       screenOptions={{
         headerShown: false,
       }}
+      initialRouteName={NAMES.homescreen}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tab.Screen component={SCREENS.HomeScreen} name={NAMES.homescreen} />

@@ -4,7 +4,7 @@ import { moderateScale, verticalScale } from '@/utils/metrics';
 import React, { useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, Animated, Easing, Image } from 'react-native';
 
-const PlanCreated = ({ visible, onClose }) => {
+const PlanCreated = ({ visible, onClose,title }:any) => {
   const scaleValue = new Animated.Value(0);
   const opacityValue = new Animated.Value(0);
 
@@ -47,7 +47,7 @@ const PlanCreated = ({ visible, onClose }) => {
     >
       <View style={styles.centeredView}>
         <Animated.View style={[styles.modalView, { opacity: opacityValue }]}>
-          <Text style={styles.modalTitle}>Activity Created: Game Night</Text>
+          <Text style={styles.modalTitle}>Activity Created: {title}</Text>
           <Text style={styles.modalText}>You're Locked In!</Text>
           <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
              <Image source={ICONS.checksIcon}/>

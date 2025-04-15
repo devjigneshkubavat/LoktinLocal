@@ -2,9 +2,9 @@ import { Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity,
 import React, { useEffect, useMemo, useState } from 'react';
 import BoxComponent from '@/hoc/OuterView';
 import Header from '@/components/Header';
-import { INTERESTS } from '@/constants';
+import { ICONS, INTERESTS } from '@/constants';
 import { STRINGS } from '@/constants/strings';
-import {styles} from './styles';
+import { styles } from './styles';
 import ProgressBar from '@/components/ProgressBar';
 import { goBack, navigate } from '@/navigation/rootNavigation';
 import Dropdown from '@/components/DropDown';
@@ -19,10 +19,15 @@ import SearchBox from '@/components/SearchBox';
 import Loader from '@/components/Loader';
 import { WModal } from '@flyskywhy/react-native-smart-tip';
 import { useTheme } from '@/hooks/useTheme';
+import { useRoute } from '@react-navigation/native';
 
 export const OnboardingFive = () => {
+  const { params } = useRoute<any>()
+  const isEdit = params?.isEdit ?? false;
+  const onSave = params?.onSave ?? (() => { });
+  const selectedData = params?.selectedData ?? null;
   const [searchText, setSearchText] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>(selectedData ?? []);
   const [filteredInterests, setFilteredInterests] = useState(INTERESTS);
   const userDetails = useSelector(selectUser)
   const dispatch = useDispatch<AppDispatch>()
@@ -44,7 +49,12 @@ export const OnboardingFive = () => {
     }
   };
 
-  const onSaveInterest = () => {   
+  const onSaveInterest = () => {
+    if(isEdit){
+      onSave(selectedTags)
+      goBack()
+      return
+    }
     dispatch(interestyRequest({
       url: 'auth/saveInterests',
       data: {
@@ -57,15 +67,16 @@ export const OnboardingFive = () => {
   return (
     <View style={styless.container}>
       <Header
-        leftIcon={false}
+        leftIcon={isEdit}
         leftView={{
           onPress: () => {
-            goBack();
+            isEdit && goBack();
           },
+          icon: ICONS.left_arrow,
         }}
         centerText=""
         viewstyle={styless.headerstyle}
-        rightView={{ onPress: () => { navigate(NAMES.onboardingSix) }, icon: STRINGS.skip }}
+        rightView={{ onPress: () => { !isEdit && navigate(NAMES.onboardingSix) }, icon: !isEdit ? STRINGS.skip : '' }}
         rightIcon={false}
       />
       <View style={styless.centerView}>

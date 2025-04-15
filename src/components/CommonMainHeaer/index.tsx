@@ -4,13 +4,12 @@ import { styles } from './styles'
 import { useTheme } from '@/hooks/useTheme'
 import Icon from '@/components/Icon';
 import { ICONS, IMAGES } from '@/constants'
-import { useNavigation } from '@react-navigation/native'
 import { NAMES } from '@/navigation/name'
+import { navigation } from '@/navigation/rootNavigation';
 
 const CommonMainHeaer: React.FC = () => {
     const { theme, themeType } = useTheme()
     const styless = useMemo(() => styles(theme), [theme])
-    const navigation = useNavigation()
 
     return (
         <View style={styless.header}>

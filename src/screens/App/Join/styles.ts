@@ -36,12 +36,12 @@ export default ({ colors }: Theme) =>
     },
     requestImage: {
       width: horizontalScale(150),
-      aspectRatio:1,
+      aspectRatio: 1,
       borderRadius: 16,
     },
     request: {
       width: horizontalScale(150),
-      aspectRatio:1,
+      aspectRatio: 1,
       justifyContent: "center",
       alignItems: "center",
       borderWidth: 1,
@@ -138,5 +138,58 @@ export default ({ colors }: Theme) =>
       flexWrap: "wrap",
       alignItems: "center",
       justifyContent: "center",
+    },
+
+    tutorialContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    tutorialBox: {
+      width: "90%",
+      backgroundColor: "#fff",
+      borderRadius: 16,
+      padding: 20,
+      elevation: 5,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      position: "relative",
+    },
+    closeIcon: {
+      position: "absolute",
+      right: 12,
+      top: 12,
+      zIndex: 1,
+    },
+    closeText: {
+      fontSize: 22,
+      color: "#aaa",
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 10,
+      textAlign: "center",
+      color: "#333",
+    },
+    description: {
+      fontSize: 15,
+      color: "#555",
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    okButton: {
+      alignSelf: "center",
+      backgroundColor: "#007BFF",
+      paddingHorizontal: 30,
+      paddingVertical: 10,
+      borderRadius: 10,
+    },
+    okButtonText: {
+      color: "#fff",
+      fontWeight: "600",
+      fontSize: 16,
     },
   });

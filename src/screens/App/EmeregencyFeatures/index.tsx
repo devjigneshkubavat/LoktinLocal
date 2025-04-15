@@ -39,7 +39,7 @@ const EmeregencyFeatures = () => {
   const emeregency: Emergency[] = [
     {
       key: "trustcontact",
-      title: "Trusted Contect",
+      title: "Trusted Contact",
       value: "9067456784",
       arrow: true,
       type: "navigation",
@@ -48,7 +48,7 @@ const EmeregencyFeatures = () => {
     },
     {
       key: "isEmergencyAllowed",
-      title: "EmergencyButton",
+      title: "Emergency Button",
       value: securitySettings?.isEmergencyAllowed,
       type: "switch",
       description:

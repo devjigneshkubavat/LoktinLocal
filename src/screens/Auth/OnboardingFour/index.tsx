@@ -13,7 +13,7 @@ import BoxComponent from '@/hoc/OuterView';
 import Header from '@/components/Header';
 import { COMMUNITIES, ICONS, IMAGES } from '@/constants';
 import { STRINGS } from '@/constants/strings';
-import {styles} from './styles';
+import { styles } from './styles';
 import ProgressBar from '@/components/ProgressBar';
 import { goBack, navigate } from '@/navigation/rootNavigation';
 import Dropdown from '@/components/DropDown';
@@ -27,9 +27,14 @@ import { communityRequest, selectUser } from '@/redux/slices/userSlice';
 import { AppDispatch } from '@/store/store';
 import Loader from '@/components/Loader';
 import { useTheme } from '@/hooks/useTheme';
+import { useRoute } from '@react-navigation/native';
 
 export const OnboardingFour = () => {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const { params } = useRoute<any>()
+  const isEdit = params?.isEdit ?? false;
+  const onSave = params?.onSave ?? (() => { });
+  const selectedData = params?.selectedData ?? null;
+  const [selectedTags, setSelectedTags] = useState<string[]>(selectedData ?? []);
   const MAX_SELECTION = 5;
   const userDetails = useSelector(selectUser)
   const { theme, handleTheme } = useTheme()
@@ -51,6 +56,11 @@ export const OnboardingFour = () => {
   };
 
   const onSaveCommunity = () => {
+    if (isEdit) {
+      onSave(selectedTags)
+      goBack()
+      return
+    }
     dispatch(communityRequest({
       url: 'auth/saveCommunities',
       data: {
@@ -60,22 +70,24 @@ export const OnboardingFour = () => {
     }))
   }
 
+
   return (
     <View style={styless.container}>
       <Header
-        leftIcon={false}
+        leftIcon={isEdit}
         leftView={{
           onPress: () => {
-            goBack();
+            isEdit && goBack();
           },
+          icon: ICONS.left_arrow,
         }}
         centerText=""
         viewstyle={styless.headerstyle}
         rightView={{
           onPress: () => {
-            navigate(NAMES.onboardingFive);
+            !isEdit && navigate(NAMES.onboardingFive);
           },
-          icon: STRINGS.skip,
+          icon: !isEdit ? STRINGS.skip : '',
         }}
         rightIcon={false}
       />
@@ -83,7 +95,7 @@ export const OnboardingFour = () => {
         <Text style={styless.introText}>{STRINGS.communityintro}</Text>
         <Text style={styless.subText}>{STRINGS.communitysub}</Text>
         <View style={styless.rowView}>
-          <Icon disabled icon={ICONS.userIcon} iconStyle={{tintColor:theme.colors.black}} />
+          <Icon disabled icon={ICONS.userIcon} iconStyle={{ tintColor: theme.colors.black }} />
           <Text style={styless.titleText}>{STRINGS.cause_community}</Text>
         </View>
         <ScrollView style={styless.container}>

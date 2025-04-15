@@ -78,7 +78,7 @@ const CreatePost = () => {
       height: 400,
       cropping: true,
     }).then((response) => {
-      console.log(response);
+      console.log(response.filename);
 
       SetInput((pre) => ({ ...pre, Imagemodal: false }));
       SetInput((pre) => ({
@@ -192,4 +192,4 @@ const CreatePost = () => {
   );
 };
 
-export default CreatePost;
+export default BoxComponent(CreatePost);

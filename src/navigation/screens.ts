@@ -31,7 +31,8 @@ import Safeword from "@/screens/App/safeword";
 import prompts from "@/screens/App/prompts";
 import SetSafeword from "@/screens/App/setsafeword";
 import CreatePost from "@/screens/App/CreatePost";
-
+import OnboardingFive1 from "@/screens/Auth/OnboardingFive";
+import OnboardingFour1 from "@/screens/Auth/OnboardingSix";
 export const SCREENS = {
     SplashScreen,
     OnboardingOne,
@@ -65,5 +66,7 @@ export const SCREENS = {
     Safeword,
     prompts,
     SetSafeword,
-    CreatePost
+    CreatePost,
+    OnboardingFive1,
+    OnboardingFour1
 }

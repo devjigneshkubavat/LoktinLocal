@@ -25,20 +25,22 @@ export const styles = ({ colors }: Theme) => StyleSheet.create({
         // backgroundColor:'red'
     },
     contentview:{
-        borderColor:COLORS.primaryColor,
         marginHorizontal:'2.5%',
-        borderRadius:moderateScale(9),
-        paddingHorizontal:horizontalScale(14),
-        paddingVertical:verticalScale(14),
-        backgroundColor:colors.saftybg,
         width:'45%',
         marginVertical:'2.5%',
+    },
+    subVIew:{
+        backgroundColor:colors.saftybg,
+        paddingVertical:verticalScale(14),
+        paddingHorizontal:horizontalScale(14),
+        borderRadius:moderateScale(9),
         borderWidth:moderateScale(1),
         elevation:0.7,
         shadowColor:'#171717',
         shadowOffset:{width: 0, height:2},
         shadowOpacity:0.2,
-        shadowRadius:3
+        shadowRadius:3,
+        borderColor:COLORS.primaryColor,
     },
     Imageview:{
         width:'100%',
@@ -51,7 +53,7 @@ export const styles = ({ colors }: Theme) => StyleSheet.create({
     },
     textview:{
         // backgroundColor:'red',
-        rowGap:verticalScale(5)
+        rowGap:verticalScale(5),
     },
     title:{ 
         color:colors.black,

@@ -47,4 +47,5 @@ export const STRINGS = {
     signinwith:`Sign in with `,
     facenotfind:`Oops! We couldn’t find a face in any of your photos. Try again with better lighting or a clearer angle`,
     leave:`Leave`,
+    bio:'Bio'
 }

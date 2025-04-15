@@ -102,6 +102,13 @@ export default ({ colors }: Theme) =>
             right: -horizontalScale(2),
             top: verticalScale(1),
         },
+        instagramImage: {
+            width: horizontalScale(18),
+            height: verticalScale(18),
+            resizeMode: 'cover',
+            right: -horizontalScale(2),
+            top: verticalScale(1),
+        },
         footerText: {
             textAlign: "center",
             fontSize: moderateScale(14),
@@ -162,4 +169,35 @@ export default ({ colors }: Theme) =>
         btnText: {
             color: colors.white,
         },
+        profileImage:{
+            height: verticalScale(80),
+            borderRadius: verticalScale(40),
+            aspectRatio:1,
+        },
+        profileImageholder:{
+            height: verticalScale(80),
+            borderRadius: verticalScale(40),
+            aspectRatio:1,
+            tintColor:COLORS.primaryColor
+        },
+        locationView:{
+            borderWidth:moderateScale(1),
+            borderColor:COLORS.primaryColor,
+            flex:1,
+            marginTop:verticalScale(-7),
+            marginBottom:verticalScale(5),
+            borderRadius:moderateScale(10),
+            paddingHorizontal:horizontalScale(16),
+            paddingVertical:verticalScale(8.5)
+        },
+        locationLabel:{
+            fontSize: moderateScale(11),
+            fontFamily: FONTS.Lexend_Light,
+            color: colors.fontblackColor,
+        },
+        locationValue:{
+            fontSize: moderateScale(16),
+            fontFamily: FONTS.Lexend_Regular,
+            color: colors.black,
+        }
     })

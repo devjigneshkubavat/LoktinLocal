@@ -64,7 +64,7 @@ export type CustomTextInputProps = TextInputProps & {
 
 export type DropdownProps = {
   label: string;
-  options: string[];
+  options: any[];
   placeholder?: string;
   onSelect: (value: string) => void;
   style?: ViewStyle;
@@ -89,14 +89,20 @@ export type UserData = {
   userId?: number | string;
   communities?: Community[];
   interests?: Interest[];
+  userBio?: string | null | undefined;
+  enable_notifications?: boolean;
+  isUserVerified?: boolean;
+  show_online_status?: boolean;
+  two_factor_authentication?: boolean;
+  ProfilePhoto?: string;
 };
 export type ModalProps = {
   isVisible?: boolean;
-  options: string[];
+  options?: any[];
   headerName?: string;
   onSelect: (value: string) => void;
   onClose: () => void;
-  selectedValue?: string | null;
+  selectedValue?: string | null | number;
 };
 
 export type Photoupload = {
@@ -146,6 +152,7 @@ export interface getAllPreferences {
   user: userDetails;
   groupEntries?: GroupEntriesEntity[] | null;
   dateTime: any;
+  planId?: number;
 }
 export interface userDetails {
   id: number;
@@ -204,6 +211,7 @@ export type ParamListTypes = {
   join: { planId: number };
   createPlan: { isUpdate?: boolean };
   preference: { groupId?: number };
+  profile: { userId?: number };
 };
 
 export interface RequestListProps {

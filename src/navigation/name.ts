@@ -33,7 +33,10 @@ type ScreenNames = {
     prompt:string
     setsafeword:string
     chnagesafeword:string,
-    createPost:string
+    createPost:string,
+     userProfile: string;
+     onboardingFour1:string;
+     onboardingFive1:string;
 };
 
 export const NAMES: ScreenNames = {
@@ -70,5 +73,8 @@ export const NAMES: ScreenNames = {
     setsafeword:'setsafeword',
     chnagesafeword:'chnagesafeword',
     messageModeration:'messageModeration',
-    createPost: "createPost"
+    createPost: "createPost",
+    userProfile: "userProfile",
+    onboardingFour1: 'OnboardingFour1',
+    onboardingFive1: 'OnboardingFive1',
 }

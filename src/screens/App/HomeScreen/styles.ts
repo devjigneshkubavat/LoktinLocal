@@ -112,7 +112,7 @@ export const styles = ({ colors }: Theme) =>
       marginBottom: verticalScale(10),
       flexDirection: "row",
       overflow: "hidden",
-      position: 'absolute',
+      position: "absolute",
       bottom: verticalScale(0),
     },
     directionView: {
@@ -154,6 +154,19 @@ export const styles = ({ colors }: Theme) =>
       fontSize: moderateScale(16),
       fontFamily: FONTS.Lexend_Medium,
       paddingRight: moderateScale(10),
+    },
+    noDataTextContainer: {
+      justifyContent: "center",
+      paddingVertical: 30,
+      flex: 1,
+      alignItems: "center",
+      backgroundColor: "rgba(0,0,0,0.1)",
+      borderRadius: 30,
+    },
+    name: {
+      fontFamily: FONTS.Lexend_Medium,
+      fontSize: moderateScale(14),
+      color: colors.fontblackColor,
     },
   });
 

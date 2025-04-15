@@ -6,7 +6,7 @@ import {  ICONS } from '@/constants';
 import { STRINGS } from '@/constants/strings';
 import {styles} from './styles';
 import ProgressBar from '@/components/ProgressBar';
-import { goBack, navigate } from '@/navigation/rootNavigation';
+import { goBack, navigate, navigation } from '@/navigation/rootNavigation';
 import Button from '@/components/Button';
 import { NAMES } from '@/navigation/name';
 import { useTheme } from '@/hooks/useTheme';
@@ -39,7 +39,7 @@ const WelcomeScreen = () => {
                     onPress={() => {navigate(NAMES.onboardingFour) }}
                     disabled={false}
                 />
-                <Text onPress={()=>{}} style={styless.contactText}>{STRINGS.addcontact}</Text>
+                <Text onPress={()=>{navigation.navigate(NAMES.trustcontact)}} style={styless.contactText}>{STRINGS.addcontact}</Text>
 
             </View>
         </View>

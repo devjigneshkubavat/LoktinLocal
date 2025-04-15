@@ -1,11 +1,16 @@
 import { ICONS } from "@/constants";
 import reduxStorage from "@/store/reduxStorage";
+import { Appearance, PermissionsAndroid, Platform } from "react-native";
 import {
-  Asset,
-  ImageLibraryOptions,
-  launchImageLibrary,
-} from "react-native-image-picker";
+  openCamera,
+  openPicker,
+  Options,
+} from "react-native-image-crop-picker";
+import { Asset } from "react-native-image-picker";
+import Geolocation from "react-native-geolocation-service";
+import Geocoder from "react-native-geocoder";
 import Toast from "react-native-toast-message";
+import { MAPBOX_API } from "./Constants";
 
 export const filteredDatawithvalue = (data: any) => {
   return Object.fromEntries(
@@ -27,7 +32,10 @@ export const addPrefixToPhone = (
   return userData; // Return as is if no phone field
 };
 
-export const showToast = (response: any, props: { position: any; icon: any; } | undefined) => {
+export const showToast = (
+  response: any,
+  props?: { position: any; icon: any } | undefined
+) => {
   if (response?.status === 200) {
     Toast.show({
       type: "customToast",
@@ -116,22 +124,52 @@ export const formatPhonenumber = (input: string) => {
   )} ${numericInput.slice(8, 12)}`;
   return formatted; // Removes all white spaces
 };
+export const isPhoneNumberValid = (number: string) => {
+  const regex = /^\+1 \d{3} \d{3} \d{4}$/;
+  return regex.test(number);
+};
 
-export const handleChooseImageFromGallery = (): Promise<Asset | undefined> => {
-  const options: ImageLibraryOptions = {
+export const handleChooseImageFromGallery = () => {
+  const options: Options = {
     mediaType: "photo",
+    cropping: true,
   };
   return new Promise((resolve, reject) => {
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        reject("User cancelled image picker");
-      } else if (response.errorCode) {
-        reject(response.errorCode);
-      } else {
-        const source: Asset | undefined = response.assets && response.assets[0];
-        resolve(source);
-      }
-    });
+    openPicker(options)
+      .then((response: any) => {
+        if (response.didCancel) {
+          reject("User cancelled image picker");
+        } else if (response.errorCode) {
+          reject(response.errorCode);
+        } else {
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
+export const handleCapturePhotoFromCamera = () => {
+  const options: Options = {
+    mediaType: "photo",
+    cropping: true,
+  };
+  return new Promise((resolve, reject) => {
+    openCamera(options)
+      .then((response: any) => {
+        if (response.didCancel) {
+          reject("User cancelled image picker");
+        } else if (response.errorCode) {
+          reject(response.errorCode);
+        } else {
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 };
 
@@ -209,3 +247,144 @@ export function formatTimestamp(timestamp: string): string {
 
   return formattedDate;
 }
+export const capitalize = (str: any) => {
+  if (!str) return ""; // Handle empty or null input
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const generateLabelString = (array: Array<any>, key: string) => {
+  return array
+    .map((item) => (typeof item === "object" && key ? item[key] : item)) // Extract key for objects, otherwise use the string directly
+    .filter(Boolean) // Remove null/undefined values
+    .join(", ");
+};
+export const generateLabelArray = (array: Array<any>, key: string) => {
+  return array
+    .map((item) => (typeof item === "object" && key ? item[key] : item)) // Extract key for objects, otherwise use the string directly
+    .filter(Boolean);
+};
+
+export const fetchthemeMode = (themeType: any) => {
+  switch (themeType) {
+    case "light":
+      return "Light Mode";
+    case "dark":
+      return "Dark Mode";
+    case "auto":
+      return "Use System Setting";
+    default:
+      return "Light Mode";
+  }
+};
+
+export const requestLocationPermission = async () => {
+  try {
+    let granted;
+
+    if (Platform.OS === "ios") {
+      granted = await Geolocation.requestAuthorization("whenInUse").catch(
+        (error) => {
+          return "denied";
+        }
+      );
+    } else {
+      granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      ).catch((error) => {
+        return PermissionsAndroid.RESULTS.DENIED;
+      });
+    }
+
+    if (
+      granted === "granted" ||
+      granted === PermissionsAndroid.RESULTS.GRANTED
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (err) {
+    return false;
+  }
+};
+
+export const LOCATION_CURRENT_OPTION: Geolocation.GeoOptions | undefined = {
+  accuracy: {
+    android: "high",
+    ios: "best",
+  },
+  enableHighAccuracy: true,
+  timeout: 15000,
+  distanceFilter: 0,
+};
+
+export const getCurrentPosition =
+  async (): Promise<Geolocation.GeoPosition> => {
+    return new Promise(async (resolve, reject) => {
+      await Geolocation.getCurrentPosition(
+        (position) => {
+          resolve(position);
+        },
+        (error) => {
+          reject(error);
+        },
+        LOCATION_CURRENT_OPTION
+      );
+    });
+  };
+
+export const getLocationFromCoordinates = async (data: any) => {
+  return new Promise((resolve, reject) => {
+    Geocoder.init;
+    let addressDetails = {};
+    Geocoder.geocodePosition({ lat: data.longitude, lng: data.longitude })
+      .then((res: any) => {
+        console.log("res, res", res);
+
+        if (res.length > 0) {
+          addressDetails = {
+            address: res[0].formattedAddress,
+            area: res[0].subLocality,
+            city: res[0].locality,
+            state: res[0].adminArea,
+            pincode: res[0].postalCode,
+            country: res[0].country,
+          };
+          return addressDetails;
+        } else {
+          reject("No address found");
+        }
+      })
+      .catch((error: any) => {
+        console.log("error", error);
+      });
+  });
+};
+export const isInputValid = (Input: any) => {
+  return (
+    Input.interests.length > 0 &&
+    Input.communities.length > 0 &&
+    Input.gender.trim() !== "" &&
+    Input.age.length === 2 &&
+    Input.age.every((num) => typeof num === "number") &&
+    Input.distance > 0
+  );
+};
+
+export const getAddressFromMapbox = async (lat: number, lng: number) => {
+  const accessToken = MAPBOX_API;
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${accessToken}`;
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data?.features?.length > 0) {
+      const address = data.features[0].place_name;
+      return address;
+    } else {
+      return "Address not found";
+    }
+  } catch (error) {
+    return "Error fetching address";
+  }
+};
