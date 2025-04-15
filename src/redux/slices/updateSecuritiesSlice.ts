@@ -51,6 +51,9 @@ export const updateSecuritiesSlice = createSlice({
     updateSecuritySettings: (state, action) => {
         state.securitySettings = action.payload;
     },
+    instagramPostsSaveDBRequest: (state, action) => {
+      // state.securitySettings = action.payload;
+  },
   },
 });
 export const {
@@ -58,6 +61,7 @@ export const {
   securityVerifyPhoneRequest,
   updateSecuritySettingsRequest,
   addPhoneNumberSuccess,
-  updateSecuritySettings
+  updateSecuritySettings,
+  instagramPostsSaveDBRequest
 } = updateSecuritiesSlice.actions;
 export default updateSecuritiesSlice.reducer;

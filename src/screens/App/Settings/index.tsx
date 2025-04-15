@@ -39,6 +39,7 @@ import { PRIVACY_URL, TOS_URL } from "@/utils/Constants";
 import { sendReportRequest } from "@/redux/slices/postSlice";
 import {
   addPhoneNumberRequest,
+  instagramPostsSaveDBRequest,
   updateSecuritySettingsRequest,
 } from "@/redux/slices/updateSecuritiesSlice";
 import { onUpdateprofile, selectUserData } from "@/redux/slices/userSlice";
@@ -77,14 +78,25 @@ const Settings = () => {
 
     // Stats for Instagram 
     const [authUrl, setAuthUrl] = useState<string>("");
-    const [accessToken, setAccessToken] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [accessToken, setAccessToken] = useState(null); // Instagram Access Token
+    const [loading, setLoading] = useState<boolean>(false);
   
     const INSTAGRAM_CLIENT_ID = '450604364686979';
     const INSTAGRAM_CLIENT_SECRET = '602a72d90240c6f085aa79d82fa122ec';
     const REDIRECT_URI = 'https://loktin.app'; // Must match Instagram App Settings
 
 
+    const apiCallForInstagramPostsSaveDB = (token: string) => {
+      dispatch(
+        instagramPostsSaveDBRequest({
+          url: "api/get-instagram-posts-save-db",
+          userToken,
+          data: {
+            accessToken: token, // Instagram Access Token
+          },
+        })
+      );
+    }
     const onPressInstagram = () => {
       const url =
         `https://api.instagram.com/oauth/authorize` +
@@ -101,7 +113,7 @@ const Settings = () => {
       return match ? match[1] : null;
     };
   
-    const getAccessToken = async (code) => {
+    const getAccessToken = async (code: any) => {
       const response = await axios.post(
         'https://api.instagram.com/oauth/access_token',
         new URLSearchParams({
@@ -127,11 +139,12 @@ const Settings = () => {
         const code = getCodeFromUrl(url);
   
         if (code) {
-          setAuthUrl(null);
+          setAuthUrl("");
           setLoading(true);
   
           try {
             const token = await getAccessToken(code);
+            apiCallForInstagramPostsSaveDB(token)
             setAccessToken(token);
             console.log('✅ Access Token:', token);
           } catch (error) {
@@ -570,7 +583,7 @@ const Settings = () => {
         leftIcon={true}
         leftView={{
           onPress: () => {
-            authUrl ? setAuthUrl(null) : goBack();
+            authUrl ? setAuthUrl("") : goBack();
           },
           icon: ICONS.left_arrow,
         }}

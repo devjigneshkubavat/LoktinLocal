@@ -9,6 +9,7 @@ import {
 import {
   addPhoneNumberRequest,
   addPhoneNumberSuccess,
+  instagramPostsSaveDBRequest,
   securityVerifyPhoneRequest,
   updateSecuritySettingsRequest,
 } from "../slices/updateSecuritiesSlice";
@@ -92,8 +93,28 @@ function* updateSecuritySettings(action: any) {
   }
 }
 
+function* instagramPostsSaveDB(action: any) {
+  const { payload } = action;
+  try {
+    const response: ApiResponse = yield call(
+      baseApi.post,
+      payload.url,
+      payload.data,
+      {
+        headers: {
+          Authorization: `Bearer ${payload.userToken}`,
+        },
+      }
+    );
+    showToast(response);
+  } catch (error) {
+    showToast(error);
+  }
+}
+
 export default function* updateSecuritiesSaga() {
   yield takeLatest(addPhoneNumberRequest.type, addPhoneNumber);
   yield takeLatest(securityVerifyPhoneRequest.type, securityVerifyPhone);
   yield takeLatest(updateSecuritySettingsRequest.type, updateSecuritySettings);
+  yield takeLatest(instagramPostsSaveDBRequest.type, instagramPostsSaveDB);
 }
